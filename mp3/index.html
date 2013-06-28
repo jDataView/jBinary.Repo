@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="/jDataView/src/jDataView.js"></script>
+	<script src="/jBinary/src/jBinary.js"></script>
+	<script src="mp3.js"></script>
+	<script>
+		addEventListener('load', function () {
+			var info = document.getElementById('info');
+
+			document.getElementById('file').addEventListener('change', function () {
+				jBinary.loadData(this.files[0], function (err, data) {
+					if (err) {
+						return alert(err);
+					}
+
+					var mp3 = new jBinary(data, jBinary.Repo.MP3);
+					var id3v1 = mp3.read('ID3v1');
+
+					info.innerHTML = '';
+					for (var key in id3v1) {
+						if (key[0] === '_') {
+							continue;
+						}
+
+						var head = document.createElement('th'),
+							cell = document.createElement('td'),
+							row = document.createElement('tr');
+
+						head.innerHTML = key;
+						row.appendChild(head);
+
+						cell.innerHTML = id3v1[key];
+						row.appendChild(cell);
+
+						info.appendChild(row);
+					}
+				});
+			});
+		});
+	</script>
+	<style type="text/css">
+		table {
+			border-collapse: collapse;
+		}
+
+		tbody th, tbody td {
+			border: 1px solid #777;
+			padding: 3pt;
+		}
+	</style>
+</head>
+<body>
+	<table>
+		<thead>
+			<tr><th><label for="file">Choose MP3 file:</label></th><th><input type="file" id="file" /></th></tr>
+		</thead>
+		<tbody id="info"></tbody>
+	</table>
+</body>
+</html>
