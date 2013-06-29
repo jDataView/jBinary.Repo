@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="/jDataView/src/jDataView.js"></script>
+	<script src="/jBinary/src/jBinary.js"></script>
+	<script src="tar.js"></script>
+	<script>
+		addEventListener('load', function () {
+			var container = document.getElementById('container');
+
+			document.getElementById('file').addEventListener('change', function () {
+				jBinary.loadData(this.files[0], function (err, data) {
+					if (err) {
+						return alert(err);
+					}
+
+					var tar = new jBinary(data, jBinary.Repo.TAR);
+					var file = tar.read('File');
+
+					for (var i = 0, length = file.length; i < length; i++) {
+						var info = document.createElement('table');
+						var item = file[i];
+
+						for (var key in item) {
+							if (key[0] === '_') {
+								continue;
+							}
+
+							var row = info.insertRow(-1);
+
+							var head = document.createElement('th');
+							head.textContent = key;
+							row.appendChild(head);
+
+							if (key !== 'content_binary') {
+								row.insertCell(-1).textContent = item[key];
+							} else {
+								if (item.size > 0) {
+									var link = document.createElement('a');
+									link.innerHTML = 'Extract';
+									link.href = '#';
+									link.download = item.name.replace(/.*\/(.*)$/, '$1');
+									link.addEventListener('click', function setLink() {
+										this.href = item[key].toURI();
+										this.removeEventListener('click', setLink);
+									});
+									row.insertCell(-1).appendChild(link);
+								} else {
+									row.insertCell(-1).innerHTML = '(Empty)';
+								}
+							}
+						}
+
+						container.appendChild(info);
+					}
+				});
+			});
+		});
+	</script>
+	<style type="text/css">
+		table {
+			border-collapse: collapse;
+			margin: 6pt;
+		}
+
+		tbody th, tbody td {
+			border: 1px solid #777;
+			padding: 3pt;
+		}
+	</style>
+</head>
+<body>
+	<label for="file">Choose TAR file:</label><input type="file" id="file" />
+	<div id="container"></div>
+</body>
+</html>
