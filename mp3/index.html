@@ -23,17 +23,13 @@
 							continue;
 						}
 
-						var head = document.createElement('th'),
-							cell = document.createElement('td'),
-							row = document.createElement('tr');
+						var row = info.insertRow(-1);
 
-						head.innerHTML = key;
+						var head = document.createElement('th');
+						head.textContent = key;
 						row.appendChild(head);
 
-						cell.innerHTML = id3v1[key];
-						row.appendChild(cell);
-
-						info.appendChild(row);
+						row.insertCell(-1).textContent = id3v1[key];
 					}
 				});
 			});
