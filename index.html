@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style type="text/css">
+		body {
+			margin: 1em;
+		}
+
+		li {
+			margin: 2pt;
+		}
+	</style>
+</head>
+<body>
+	<h2>List of jBinary.Repo demos:</h2>
+	<ul id="items"></ul>
+	<script>
+		function listItems(response) {
+			var ul = document.getElementById('items');
+			var items = response.data;
+			for (var i = 0; i < items.length; i++) {
+				var item = items[i];
+				if (item.type !== 'dir') {
+					continue;
+				}
+				var link = document.createElement('a');
+				link.innerHTML = link.href = item.name;
+				var li = document.createElement('li');
+				li.appendChild(link);
+				ul.appendChild(li);
+			}
+		}
+	</script>
+	<script src="https://api.github.com/repos/jDataView/jBinary.Repo/contents/?callback=listItems"></script>
+</body>
+</html>
