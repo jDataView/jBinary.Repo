@@ -4,73 +4,107 @@
 	<script src="https://rawgithub.com/jDataView/jDataView/master/src/jDataView.js"></script>
 	<script src="https://rawgithub.com/jDataView/jBinary/master/src/jBinary.js"></script>
 	<script src="tar.js"></script>
+	<script src="https://rawgithub.com/jonathantneal/2869388/raw/989d46f574934be64348b7caf4cc149b007bf76f/eventListener.js"></script>
 	<script>
 		addEventListener('load', function () {
 			var container = document.getElementById('container');
 
-			document.getElementById('file').addEventListener('change', function () {
-				jBinary.loadData(this.files[0], function (err, data) {
-					if (err) {
-						return alert(err);
-					}
+			function handleData(err, data) {
+				if (err) {
+					return alert(err);
+				}
 
-					var tar = new jBinary(data, jBinary.Repo.TAR);
-					var file = tar.read('File');
+				var tar = new jBinary(data, jBinary.Repo.TAR);
+				var file = tar.read('File');
 
-					for (var i = 0, length = file.length; i < length; i++) {
-						var info = document.createElement('table');
-						var item = file[i];
+				container.innerHTML = '';
 
-						for (var key in item) {
-							if (key[0] === '_') {
-								continue;
-							}
+				for (var i = 0, length = file.length; i < length; i++) {
+					var info = document.createElement('table');
+					var item = file[i];
 
-							var row = info.insertRow(-1);
-
-							var head = document.createElement('th');
-							head.textContent = key;
-							row.appendChild(head);
-
-							if (key !== 'content_binary') {
-								row.insertCell(-1).textContent = item[key];
-							} else {
-								if (item.size > 0) {
-									var link = document.createElement('a');
-									link.innerHTML = 'Extract';
-									link.href = '#';
-									link.download = item.name.replace(/.*\/(.*)$/, '$1');
-									link.addEventListener('click', function setLink() {
-										this.href = item[key].toURI();
-										this.removeEventListener('click', setLink);
-									});
-									row.insertCell(-1).appendChild(link);
-								} else {
-									row.insertCell(-1).innerHTML = '(Empty)';
-								}
-							}
+					for (var key in item) {
+						if (key.charAt(0) === '_') {
+							continue;
 						}
 
-						container.appendChild(info);
+						var row = info.insertRow(-1);
+
+						var head = document.createElement('th');
+						head.innerHTML = key;
+						row.appendChild(head);
+
+						var cell = document.createElement('td');
+						row.appendChild(cell);
+
+						if (key !== 'content_binary') {
+							cell.textContent = cell.innerText = item[key];
+						} else {
+							if (item.size > 0) {
+								var link = document.createElement('a');
+								link.innerHTML = 'Extract';
+								link.href = '#';
+								link.download = item.name.replace(/.*\/(.*)$/, '$1');
+								link.onclick = function () {
+									this.href = item.content_binary.toURI('text/plain');
+								};
+								cell.appendChild(link);
+							} else {
+								cell.innerHTML = '(Empty)';
+							}
+						}
 					}
+
+					container.appendChild(info);
+				}
+			}
+
+			document.getElementById('url').addEventListener('click', function (event) {
+				var oldTitle = document.title;
+				document.title = '...loading, please wait...';
+				jBinary.loadData(this.href, function (err, data) {
+					document.title = oldTitle;
+					handleData.apply(this, arguments);
 				});
+				event.preventDefault();
 			});
+
+			if ('File' in this) {
+				document.getElementById('fileApi').style.display = 'block';
+
+				document.getElementById('file').addEventListener('change', function () {
+					jBinary.loadData(this.files[0], handleData);
+				});
+			}
 		});
 	</script>
 	<style type="text/css">
+		#fileApi {
+			display: none;
+		}
+
 		table {
 			border-collapse: collapse;
 			margin: 6pt;
 		}
 
-		tbody th, tbody td {
+		th, td {
 			border: 1px solid #777;
 			padding: 3pt;
 		}
 	</style>
 </head>
 <body>
-	<label for="file">Choose TAR file:</label><input type="file" id="file" />
+	Load TAR sample: <a id="url" href="sample.tar">Load</a><br />
+	<div id="fileApi">
+		<small>or</small><br />
+		<label for="file">Choose TAR file:</label><input type="file" id="file" />
+	</div>
+	<hr />
 	<div id="container"></div>
+	<!--[if lt IE 10]>
+	<hr />
+	<small>Please note IE&lt;10 doesn't allow to save files from Data-URIs so you won't be able to extract particular files in those browsers from demo. If you want to use their contents in own solution, consider reading it as string or similar ways.</small>
+	<![endif]-->
 </body>
 </html>

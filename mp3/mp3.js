@@ -1,4 +1,4 @@
-(jBinary.Repo || (jBinary.Repo = {})).MP3 = {
+jBinary.Repo.MP3 = {
 	MetaValue: ['string0', 30],
 
 	ID3v1: ['extend',
@@ -14,7 +14,7 @@
 		['if_not', function (context) { return context.comment.length > 28 }, {
 			_back: ['skip', -2],
 			_zero_byte: ['const', 'uint8', 0, true],
-			track: 'uint8',
+			track: 'uint8'
 		}],
 		{
 			genre: ['enum', 'uint8', [

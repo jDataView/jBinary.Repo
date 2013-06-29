@@ -1,4 +1,4 @@
-(jBinary.Repo || (jBinary.Repo = {})).TAR = {
+jBinary.Repo.TAR = {
 	OctValue: jBinary.Template({
 		params: ['size'],
 		setParams: function (size) {
