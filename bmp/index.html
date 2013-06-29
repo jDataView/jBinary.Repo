@@ -90,7 +90,7 @@
 				}
 
 				var bmp = new jBinary(new jDataView(data, undefined, undefined, true), jBinary.Repo.BMP);
-				var header = bmp.read('header');
+				var header = bmp.read('Header');
 				canvas.width = header.size.horz;
 				canvas.height = header.size.vert;
 
@@ -117,7 +117,7 @@
 							row.appendChild(head);
 
 							var cell = document.createElement('td');
-							cell.innerHTML = obj[key];
+							cell.innerHTML = value;
 							row.appendChild(cell);
 						}
 					}
