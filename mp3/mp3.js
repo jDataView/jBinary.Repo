@@ -11,7 +11,7 @@
 			year: ['string', 4],
 			comment: 'MetaValue'
 		},
-		['if_not', function (context) { console.log(context.comment); return context.comment.length > 28 }, {
+		['if_not', function (context) { return context.comment.length > 28 }, {
 			_back: ['skip', -2],
 			_zero_byte: ['const', 'uint8', 0, true],
 			track: 'uint8',
