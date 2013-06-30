@@ -1,11 +1,11 @@
 jBinary.Repo.BMP = {
-	BGR: {
+	RGBTriple: {
 		b: 'uint8',
 		g: 'uint8',
 		r: 'uint8'
 	},
 
-	BGRA: ['extend', 'BGR', {
+	RGBQuad: ['extend', 'RGBTriple', {
 		a: 'uint8'
 	}],
 
@@ -14,7 +14,76 @@ jBinary.Repo.BMP = {
 		vert: 'uint32'
 	},
 
-	Header: {
+	PixelRow: jBinary.Template({
+		palette: null,
+
+		setParams: function (header) {
+			var itemType;
+
+			switch (header.bpp) {
+				case 1:
+				case 2:
+				case 4:
+					this.palette = header.palette;
+					itemType = header.bpp;
+					break;
+
+				case 8:
+					this.palette = header.palette;
+					itemType = 'uint8';
+					break;
+
+				case 16:
+					itemType = jBinary.Template({
+						baseType: 'uint16',
+						mask: header.mask,
+						read: function () {
+							var colorIndex = this.baseRead();
+							return {
+								b: (colorIndex & this.mask.b) << 3,
+								g: (colorIndex & this.mask.g) >> 3,
+								r: (colorIndex & this.mask.r) >> 8
+							};
+						}
+					});
+					break;
+
+				case 24:
+					itemType = 'RGBTriple';
+					break;
+
+				case 32:
+					itemType = 'RGBQuad';
+					break;
+
+				default:
+					throw new TypeError('Sorry, but ' + header.bpp + 'bpp images are not supported.');
+			}
+
+			this.baseType = ['array', itemType, header.size.horz];
+			this.dataOffset = header.dataOffset;
+		},
+
+		read: function () {
+			var colors = this.baseRead();
+			if (this.palette !== null) {
+				for (var i = 0, length = colors.length; i < length; i++) {
+					colors[i] = this.palette[colors[i]];
+				}
+			}
+
+			// padding new row's alignment to 4 bytes
+			var offsetOverhead = (this.binary.tell() - this.dataOffset) % 4;
+			if (offsetOverhead) {
+				this.binary.skip(4 - offsetOverhead);
+				this.binary._bitShift = 0;
+			}
+
+			return colors;
+		}
+	}),
+
+	Image: {
 		// bitmap "magic" signature
 		_signature: ['const', ['string', 2], 'BM', true],
 		// full file Dimensions
@@ -52,12 +121,34 @@ jBinary.Repo.BMP = {
 			}
 		}),
 		// color palette (mandatory for <=8bpp images)
-		palette: ['if', function (context) { return context.bpp <= 8 }, ['array', ['extend', 'BGR', {_padding: ['skip', 1]}], 'colorsCount']],
+		palette: ['if', function (context) { return context.bpp <= 8 }, ['array', ['extend', 'RGBTriple', {_padding: ['skip', 1]}], 'colorsCount']],
 		// color masks (needed for 16bpp images)
 		mask: {
 			r: 'uint32',
 			g: 'uint32',
 			b: 'uint32'
-		}
+		},
+		pixelData: jBinary.Type({
+			read: function (header) {
+				if (header.compression !== 0 && header.compression !== 3) {
+					return null;
+				}
+
+				return this.binary.seek(header.dataOffset, function () {
+					var width = header.size.horz, height = header.size.vert;
+					var data = new jDataView(4 * width * height);
+					var PixelRow = this.getType(['PixelRow', header]);
+					for (var y = height - 1; y > 0; y--) {
+						data.seek(4 * y * width);
+						var colors = this.read(PixelRow);
+						for (var i = 0, length = colors.length; i < length; i++) {
+							var color = colors[i];
+							data.writeBytes([color.r, color.g, color.b, 'a' in color ? color.a : 255]);
+						}
+					}
+					return data.getBytes(undefined, 0);
+				});
+			}
+		})
 	}
 };

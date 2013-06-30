@@ -11,77 +11,31 @@
 			var canvas = document.getElementById('canvas');
 			var context = canvas.getContext('2d');
 
-			function drawToCanvas(bmp, header) {
-				if (header.compression !== 0 && header.compression !== 3) {
+			function longOperation(name, async) {
+				var oldTitle = document.title;
+				document.title = 'Please wait, ' + name + '...';
+				async(function () {
+					document.title = oldTitle;
+				});
+			}
+
+			function drawToCanvas(bmp, image) {
+				if (!image.pixelData) {
 					throw new TypeError('Sorry, but RLE compressed images are not supported.');
 				}
 
-				bmp.seek(header.dataOffset);
+				var imgData = context.createImageData(image.size.horz, image.size.vert);
 
-				var size = header.size,
-					imgData = context.createImageData(size.horz, size.vert);
-
-				canvas.width = size.horz;
-				canvas.height = size.vert;
-
-				// iterating over resulting bitmap bottom-to-top, left-to-right
-				for (var y = size.vert - 1; y > 0; y--) {
-					// calculating image data offset for row [y]
-					var dataPos = 4 * y * size.horz;
-
-					// iterating over row pixels
-					for (var x = 0; x < size.horz; x++) {
-						var color;
-
-						switch (header.bpp) {
-							case 1:
-							case 2:
-							case 4:
-								color = header.palette[bmp.read(header.bpp)];
-								break;
-
-							case 8:
-								color = header.palette[bmp.read('uint8')];
-								break;
-
-							case 16:
-								// extracting RGB values using 5-6-5 encoding scheme and given masks
-								colorIndex = bmp.read('uint16');
-								color = {
-									b: (colorIndex & header.mask.b) << 3,
-									g: (colorIndex & header.mask.g) >> 3,
-									r: (colorIndex & header.mask.r) >> 8
-								};
-								break;
-
-							case 24:
-								// reading RGB color
-								color = bmp.read('bgr');
-								break;
-
-							case 32:
-								// reading RGBA color
-								color = bmp.read('bgra');
-								break;
-
-							default:
-								throw new TypeError('Sorry, but ' + header.bpp + 'bpp images are not supported.');
-						}
-
-						// putting resulting RGBA values to image data
-						imgData.data[dataPos++] = color.r;
-						imgData.data[dataPos++] = color.g;
-						imgData.data[dataPos++] = color.b;
-						imgData.data[dataPos++] = color.a !== undefined ? color.a : 255;
-					}
-
-					// padding new row's alignment to 4 bytes
-					var offsetOverhead = (bmp.tell() - header.dataOffset) % 4;
-					if (offsetOverhead) {
-						bmp.skip(4 - offsetOverhead);
-						bmp._bitShift = 0;
+				if ('set' in imgData.data) {
+					imgData.data.set(image.pixelData);
+				} else {
+					for (var i = 0, length = image.pixelData.length; i < length; i++) {
+						imgData.data[i] = image.pixelData[i];
 					}
 				}
+
+				canvas.width = imgData.width;
+				canvas.height = imgData.height;
 
 				// putting image data to given canvas context
 				context.putImageData(imgData, 0, 0);
@@ -92,8 +46,13 @@
 					return alert(err);
 				}
 
-				var bmp = new jBinary(new jDataView(data, undefined, undefined, true), jBinary.Repo.BMP);
-				var header = bmp.read('Header');
+				var bmp = new jBinary(new jDataView(data, undefined, undefined, true), jBinary.Repo.BMP), image;
+
+				longOperation('parsing', function (done) {
+					image = bmp.read('Image');
+					done();
+				});
+
 				canvas.width = canvas.height = 0;
 
 				while (info.firstChild) {
@@ -112,6 +71,10 @@
 						if (value.constructor === Object) {
 							iterate(value, prefix + key + '.');
 						} else {
+							if (value.constructor === Array) {
+								value = '[...]';
+							}
+
 							var row = info.insertRow(-1);
 
 							var head = document.createElement('th');
@@ -125,19 +88,36 @@
 					}
 				}
 
-				iterate(header, '');
+				iterate(image, '');
 
-				if (confirm('Do you want to render loaded BMP manually?')) {
-					drawToCanvas(bmp, header);
-				}
+				var renderLink = document.createElement('a');
+				renderLink.href = '#';
+				renderLink.innerHTML = 'Render';
+				renderLink.addEventListener('click', function (event) {
+					longOperation('rendering', function (done) {
+						drawToCanvas(bmp, image);
+						done();
+					});
+					event.preventDefault();
+				});
+
+				var row = info.insertRow(-1);
+
+				var head = document.createElement('th');
+				head.innerHTML = 'Actions';
+				row.appendChild(head);
+
+				var cell = document.createElement('td');
+				cell.appendChild(renderLink);
+				row.appendChild(cell);
 			}
 
 			document.getElementById('url').addEventListener('click', function (event) {
-				var oldTitle = document.title;
-				document.title = '...loading, please wait...';
-				jBinary.loadData(event.target.href, function (err, data) {
-					document.title = oldTitle;
-					handleData.apply(this, arguments);
+				longOperation('loading', function (done) {
+					jBinary.loadData(event.target.href, function (err, data) {
+						handleData.apply(this, arguments);
+						done();
+					});
 				});
 				event.preventDefault();
 			});

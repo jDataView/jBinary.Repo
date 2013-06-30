@@ -11,71 +11,28 @@
 			var canvas = document.getElementById('canvas');
 			var context = canvas.getContext('2d');
 
-			function drawToCanvas(bmp, header) {
-				var size = header.size,
-					imgData = context.createImageData(size.horz, size.vert);
+			function longOperation(name, async) {
+				var oldTitle = document.title;
+				document.title = 'Please wait, ' + name + '...';
+				async(function () {
+					document.title = oldTitle;
+				});
+			}
 
-				canvas.width = size.horz;
-				canvas.height = size.vert;
+			function drawToCanvas(ico, image) {
+				var imgData = context.createImageData(image.width, image.height);
+				var iconImage = ico.read('IconImage', image.dataOffset);
 
-				// iterating over resulting bitmap bottom-to-top, left-to-right
-				for (var y = size.vert - 1; y > 0; y--) {
-					// calculating image data offset for row [y]
-					var dataPos = 4 * y * size.horz;
-
-					// iterating over row pixels
-					for (var x = 0; x < size.horz; x++) {
-						var color;
-
-						switch (header.bpp) {
-							case 1:
-							case 2:
-							case 4:
-								color = header.palette[bmp.read(header.bpp)];
-								break;
-
-							case 8:
-								color = header.palette[bmp.read('uint8')];
-								break;
-
-							case 16:
-								// extracting RGB values using 5-6-5 encoding scheme and given masks
-								colorIndex = bmp.read('uint16');
-								color = {
-									b: (colorIndex & header.mask.b) << 3,
-									g: (colorIndex & header.mask.g) >> 3,
-									r: (colorIndex & header.mask.r) >> 8
-								};
-								break;
-
-							case 24:
-								// reading RGB color
-								color = bmp.read('RGBTriple');
-								break;
-
-							case 32:
-								// reading RGBA color
-								color = bmp.read('RGBQuad');
-								break;
-
-							default:
-								throw new TypeError('Sorry, but ' + header.bpp + 'bpp images are not supported.');
-						}
-
-						// putting resulting RGBA values to image data
-						imgData.data[dataPos++] = color.r;
-						imgData.data[dataPos++] = color.g;
-						imgData.data[dataPos++] = color.b;
-						imgData.data[dataPos++] = color.a !== undefined ? color.a : 255;
-					}
-
-					// padding new row's alignment to 4 bytes
-					var offsetOverhead = (bmp.tell() - header.dataOffset) % 4;
-					if (offsetOverhead) {
-						bmp.skip(4 - offsetOverhead);
-						bmp._bitShift = 0;
+				if ('set' in imgData.data) {
+					imgData.data.set(iconImage.pixelData);
+				} else {
+					for (var i = 0, length = iconImage.pixelData.length; i < length; i++) {
+						imgData.data[i] = iconImage.pixelData[i];
 					}
 				}
+
+				canvas.width = imgData.width;
+				canvas.height = imgData.height;
 
 				// putting image data to given canvas context
 				context.putImageData(imgData, 0, 0);
@@ -86,8 +43,13 @@
 					return alert(err);
 				}
 
-				var ico = new jBinary(new jDataView(data, undefined, undefined, true), jBinary.Repo.ICO);
-				var iconDir = ico.read('IconDir');
+				var ico = new jBinary(new jDataView(data, undefined, undefined, true), jBinary.Repo.ICO), iconDir;
+
+				longOperation('parsing', function (done) {
+					iconDir = ico.read('IconDir');
+					done();
+				});
+
 				container.innerHTML = '';
 				canvas.width = canvas.height = 0;
 
@@ -125,15 +87,14 @@
 					iterate(info, iconDir[i], '');
 
 					var renderLink = document.createElement('a');
-					renderLink.href = '#';
+					renderLink.href = '#' + i;
 					renderLink.innerHTML = 'Render';
 					renderLink.addEventListener('click', function (event) {
-						var imgIndex = Number(this.getAttribute('data-index'));
-						var image = iconDir[imgIndex];
-						ico.seek(image.dataOffset);
-						var header = ico.read('ImageHeader');
-						header.size.vert /= 2;
-						drawToCanvas(ico, header);
+						var imgIndex = this.href.match(/#(\d+)$/)[1];
+						longOperation('rendering', function (done) {
+							drawToCanvas(ico, iconDir[imgIndex]);
+							done();
+						});
 						event.preventDefault();
 					});
 
@@ -152,11 +113,11 @@
 			}
 
 			document.getElementById('url').addEventListener('click', function (event) {
-				var oldTitle = document.title;
-				document.title = '...loading, please wait...';
-				jBinary.loadData(this.href, function (err, data) {
-					document.title = oldTitle;
-					handleData.apply(this, arguments);
+				longOperation('loading', function (done) {
+					jBinary.loadData(event.target.href, function (err, data) {
+						handleData.apply(this, arguments);
+						done();
+					});
 				});
 				event.preventDefault();
 			});
