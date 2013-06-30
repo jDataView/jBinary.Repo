@@ -57,8 +57,16 @@
 								link.innerHTML = 'Extract';
 								link.href = '#';
 								link.download = item.name.replace(/.*\/(.*)$/, '$1');
-								link.onclick = function () {
-									this.href = item.content_binary.toURI('text/plain');
+								link.target = '_blank';
+								link.onclick = function (event) {
+									// handy method, but only in IE10 as for now :(
+									if ('msSaveOrOpenBlob' in navigator) {
+										navigator.msSaveBlob(new Blob([item.content_binary.read('blob', 0)]), this.download);
+										event.preventDefault();
+									} else {
+										this.href = item.content_binary.toURI();
+										this.onclick = null;
+									}
 								};
 								cell.appendChild(link);
 							} else {
