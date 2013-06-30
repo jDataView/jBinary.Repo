@@ -2,32 +2,38 @@
 <html>
 <head>
 	<style type="text/css">
-		body {
-			margin: 1em;
-		}
-
-		li {
-			margin: 2pt;
-		}
+		body { margin: 1em; text-align: center; }
+		h2 { text-decoration: underline; }
+		th { text-align: right; }
+		td, th { padding-right: 2pt; padding-bottom: 2pt; }
 	</style>
 </head>
 <body>
-	<h2>List of jBinary.Repo demos:</h2>
-	<ul id="items"></ul>
+	<a href="https://github.com/jDataView/jBinary.Repo"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png" alt="Fork me on GitHub"></a>
+	<h2>List of <a href="https://github.com/jDataView/jBinary.Repo/">jBinary.Repo</a> demos</h2>
+	<table id="items"></table>
 	<script>
 		function listItems(response) {
-			var ul = document.getElementById('items');
-			var items = response.data;
+			var table = document.getElementById('items'),
+				items = response.data;
+
 			for (var i = 0; i < items.length; i++) {
 				var item = items[i];
 				if (item.type !== 'dir') {
 					continue;
 				}
-				var link = document.createElement('a');
-				link.innerHTML = link.href = item.name;
-				var li = document.createElement('li');
-				li.appendChild(link);
-				ul.appendChild(li);
+				
+				var row = table.insertRow(-1);
+
+				function addCell(html, isHead) {
+					var element = document.createElement(isHead ? 'th' : 'td');
+					element.innerHTML = html.replace(/\$/g, item.name);
+					row.appendChild(element);
+				}
+
+				addCell('$:', true);
+				addCell('<a href="$/">Demo</a>');
+				addCell('<a href="https://github.com/jDataView/jBinary.Repo/blob/gh-pages/$/$.js">Source code</a>');
 			}
 		}
 	</script>
