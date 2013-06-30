@@ -9,13 +9,25 @@
 		addEventListener('load', function () {
 			var info = document.getElementById('info');
 
+			function longOperation(name, async) {
+				var oldTitle = document.title;
+				document.title = 'Please wait, ' + name + '...';
+				async(function () {
+					document.title = oldTitle;
+				});
+			}
+
 			function handleData(err, data) {
 				if (err) {
 					return alert(err);
 				}
 
-				var mp3 = new jBinary(data, jBinary.Repo.MP3);
-				var id3v1 = mp3.read('ID3v1');
+				var mp3 = new jBinary(data, jBinary.Repo.MP3), id3v1;
+
+				longOperation('parsing', function (done) {
+					id3v1 = mp3.read('ID3v1');
+					done();
+				});
 
 				while (info.firstChild) {
 					info.removeChild(info.firstChild);
@@ -39,11 +51,11 @@
 			}
 
 			document.getElementById('url').addEventListener('click', function (event) {
-				var oldTitle = document.title;
-				document.title = '...loading, please wait...';
-				jBinary.loadData(this.href, function (err, data) {
-					document.title = oldTitle;
-					handleData.apply(this, arguments);
+				longOperation('loading', function (done) {
+					jBinary.loadData(event.target.href, function (err, data) {
+						handleData.apply(this, arguments);
+						done();
+					});
 				});
 				event.preventDefault();
 			});
