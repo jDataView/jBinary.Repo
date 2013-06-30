@@ -23,7 +23,7 @@
 					return alert(err);
 				}
 
-				var gzip = new jBinary(new jDataView(data, undefined, undefined, true), jBinary.Repo.GZIP), file;
+				var gzip = new jBinary(data, jBinary.Repo.GZIP), file;
 
 				longOperation('parsing', function (done) {
 					file = gzip.read('File');

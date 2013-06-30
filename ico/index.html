@@ -43,7 +43,7 @@
 					return alert(err);
 				}
 
-				var ico = new jBinary(new jDataView(data, undefined, undefined, true), jBinary.Repo.ICO), iconDir;
+				var ico = new jBinary(data, jBinary.Repo.ICO), iconDir;
 
 				longOperation('parsing', function (done) {
 					iconDir = ico.read('IconDir');

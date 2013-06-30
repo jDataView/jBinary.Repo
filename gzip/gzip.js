@@ -1,4 +1,8 @@
 jBinary.Repo.GZIP = {
+	jBinary: {
+		littleEndian: true
+	},
+
 	Flag: jBinary.Template({
 		baseType: 1,
 		params: ['fieldName'],

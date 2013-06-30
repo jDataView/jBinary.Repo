@@ -46,7 +46,7 @@
 					return alert(err);
 				}
 
-				var bmp = new jBinary(new jDataView(data, undefined, undefined, true), jBinary.Repo.BMP), image;
+				var bmp = new jBinary(data, jBinary.Repo.BMP), image;
 
 				longOperation('parsing', function (done) {
 					image = bmp.read('Image');

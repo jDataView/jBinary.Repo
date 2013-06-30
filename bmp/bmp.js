@@ -1,4 +1,8 @@
 jBinary.Repo.BMP = {
+	jBinary: {
+		littleEndian: true
+	},
+
 	RGBTriple: {
 		b: 'uint8',
 		g: 'uint8',
