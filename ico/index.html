@@ -3,21 +3,15 @@
 <head>
 	<script src="https://rawgithub.com/jDataView/jDataView/master/src/jDataView.js"></script>
 	<script src="https://rawgithub.com/jDataView/jBinary/master/src/jBinary.js"></script>
-	<script src="bmp.js"></script>
+	<script src="ico.js"></script>
 	<script src="https://rawgithub.com/jonathantneal/2869388/raw/989d46f574934be64348b7caf4cc149b007bf76f/eventListener.js"></script>
 	<script>
 		addEventListener('load', function () {
-			var info = document.getElementById('info');
+			var container = document.getElementById('container');
 			var canvas = document.getElementById('canvas');
 			var context = canvas.getContext('2d');
 
 			function drawToCanvas(bmp, header) {
-				if (header.compression !== 0 && header.compression !== 3) {
-					throw new TypeError('Sorry, but RLE compressed images are not supported.');
-				}
-
-				bmp.seek(header.dataOffset);
-
 				var size = header.size,
 					imgData = context.createImageData(size.horz, size.vert);
 
@@ -56,12 +50,12 @@
 
 							case 24:
 								// reading RGB color
-								color = bmp.read('bgr');
+								color = bmp.read('RGBTriple');
 								break;
 
 							case 32:
 								// reading RGBA color
-								color = bmp.read('bgra');
+								color = bmp.read('RGBQuad');
 								break;
 
 							default:
@@ -92,15 +86,12 @@
 					return alert(err);
 				}
 
-				var bmp = new jBinary(new jDataView(data, undefined, undefined, true), jBinary.Repo.BMP);
-				var header = bmp.read('Header');
+				var ico = new jBinary(new jDataView(data, undefined, undefined, true), jBinary.Repo.ICO);
+				var iconDir = ico.read('IconDir');
+				container.innerHTML = '';
 				canvas.width = canvas.height = 0;
 
-				while (info.firstChild) {
-					info.removeChild(info.firstChild);
-				}
-
-				function iterate(obj, prefix) {
+				function iterate(info, obj, prefix) {
 					for (var key in obj) {
 						if (key.charAt(0) === '_') {
 							continue;
@@ -110,8 +101,12 @@
 
 						// only simple objects; show array as string to reduce size on screen
 						if (value.constructor === Object) {
-							iterate(value, prefix + key + '.');
+							iterate(info, value, prefix + key + '.');
 						} else {
+							if (value.constructor === Array) {
+								value = '[...]';
+							}
+
 							var row = info.insertRow(-1);
 
 							var head = document.createElement('th');
@@ -125,17 +120,41 @@
 					}
 				}
 
-				iterate(header, '');
+				for (var i = 0, length = iconDir.length; i < length; i++) {
+					var info = document.createElement('table');
+					iterate(info, iconDir[i], '');
 
-				if (confirm('Do you want to render loaded BMP manually?')) {
-					drawToCanvas(bmp, header);
+					var renderLink = document.createElement('a');
+					renderLink.href = '#';
+					renderLink.innerHTML = 'Render';
+					renderLink.addEventListener('click', function (event) {
+						var imgIndex = Number(this.getAttribute('data-index'));
+						var image = iconDir[imgIndex];
+						ico.seek(image.dataOffset);
+						var header = ico.read('ImageHeader');
+						header.size.vert /= 2;
+						drawToCanvas(ico, header);
+						event.preventDefault();
+					});
+
+					var row = info.insertRow(-1);
+
+					var head = document.createElement('th');
+					head.innerHTML = 'Actions';
+					row.appendChild(head);
+
+					var cell = document.createElement('td');
+					cell.appendChild(renderLink);
+					row.appendChild(cell);
+
+					container.appendChild(info);
 				}
 			}
 
 			document.getElementById('url').addEventListener('click', function (event) {
 				var oldTitle = document.title;
 				document.title = '...loading, please wait...';
-				jBinary.loadData(event.target.href, function (err, data) {
+				jBinary.loadData(this.href, function (err, data) {
 					document.title = oldTitle;
 					handleData.apply(this, arguments);
 				});
@@ -157,8 +176,11 @@
 		}
 
 		table {
-			float: left;
 			border-collapse: collapse;
+		}
+
+		#container {
+			float: left;
 		}
 
 		canvas {
@@ -173,15 +195,13 @@
 	</style>
 </head>
 <body>
-	Load BMP sample: <span id="url"><a href="1bpp.bmp">1 BPP</a>, <a href="16bpp.bmp">16 BPP</a>, <a href="24bpp.bmp">24 BPP</a></span><br />
+	Load ICO sample: <a id="url" href="sample.ico">Load</a>
 	<div id="fileApi">
 		<small>or</small><br />
-		<label for="file">Choose BMP file:</label><input type="file" id="file" />
+		<label for="file">Choose ICO file:</label><input type="file" id="file" />
 	</div>
 	<hr />
-	<table>
-		<tbody id="info"></tbody>
-	</table>
+	<div id="container"></div>
 	<canvas id="canvas"></canvas>
 </body>
 </html>
