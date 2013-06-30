@@ -67,23 +67,7 @@ jBinary.Repo.TAR = {
 	}],
 	{
 		_padding1: 'Padding',
-		content_binary: jBinary.Type({
-			read: function () {
-				var header = this.binary.getContext(1);
-				if (!header.size) {
-					return;
-				}
-				var startPos = this.binary.tell();
-				this.binary.skip(header.size);
-				return this.binary.slice(startPos, this.binary.tell());
-			},
-			write: function (binary) {
-				if (!binary) {
-					return;
-				}
-				this.binary.write('blob', binary.read('blob', 0));
-			}
-		}),
+		content_binary: ['binary', function () { return this.binary.getContext(1).size }],
 		_padding2: 'Padding'
 	}
 	],
