@@ -57,11 +57,9 @@ jBinary.Repo.TAR = {
 			'7': 'contiguous'
 		}],
 		name_linked: ['string0', 100],
-		_ustar: ['const', ['string', 5], 'ustar']
+		_ustar: ['const', ['string', 8], 'ustar\x0000']
 	},
-	['if', function (context) { return context._ustar === undefined || context._ustar === 'ustar' }, {
-		_ustar_finish: ['const', 'char', '\0'],
-		_ustar_version: ['const', ['string', 2], '00'],
+	['if', function (context) { return context._ustar === undefined || context._ustar === 'ustar\x0000' }, {
 		owner_name: ['string0', 32],
 		group_name: ['string0', 32],
 		device: ['array', 'Oct8', 2],
