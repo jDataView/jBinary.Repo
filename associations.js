@@ -25,7 +25,7 @@ var descriptors = {
 
 var associations = {
 	extensions: {},
-	mimeTypes: {},
+	mimeTypes: {}
 };
 
 function mergeDescriptorList(name, listName) {
