@@ -1,7 +1,6 @@
 jBinary.Repo.BMP = {
-	jBinary: {
-		littleEndian: true
-	},
+	'jBinary.littleEndian': true,
+	'jBinary.mimeType': 'image/bmp',
 
 	RGBTriple: {
 		b: 'uint8',

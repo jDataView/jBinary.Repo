@@ -1,7 +1,6 @@
 jBinary.Repo.ICO = {
-	jBinary: {
-		littleEndian: true
-	},
+	'jBinary.littleEndian': true,
+	'jBinary.mimeType': 'image/x-icon',
 
 	RGBTriple: {
 		b: 'uint8',

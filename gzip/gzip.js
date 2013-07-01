@@ -1,7 +1,6 @@
 jBinary.Repo.GZIP = {
-	jBinary: {
-		littleEndian: true
-	},
+	'jBinary.littleEndian': true,
+	'jBinary.mimeType': 'application/x-gzip',
 
 	Flag: jBinary.Template({
 		baseType: 1,

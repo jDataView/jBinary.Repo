@@ -1,4 +1,6 @@
 jBinary.Repo.MP3 = {
+	'jBinary.mimeType': 'audio/mpeg',
+
 	MetaValue: ['string0', 30],
 
 	ID3v1: ['extend',

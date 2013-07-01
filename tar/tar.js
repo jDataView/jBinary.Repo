@@ -1,4 +1,6 @@
 jBinary.Repo.TAR = {
+	'jBinary.mimeType': 'application/x-tar',
+
 	OctValue: jBinary.Template({
 		params: ['size'],
 		setParams: function (size) {
