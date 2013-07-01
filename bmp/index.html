@@ -9,7 +9,9 @@
 		addEventListener('load', function () {
 			var info = document.getElementById('info');
 			var canvas = document.getElementById('canvas');
-			var context = canvas.getContext('2d');
+			var context = 'getContext' in canvas ? canvas.getContext('2d') : null;
+			var img = document.getElementById('img');
+			img.width = img.height = canvas.width = canvas.height = 0;
 
 			function longOperation(name, async) {
 				var oldTitle = document.title;
@@ -53,7 +55,7 @@
 					done();
 				});
 
-				canvas.width = canvas.height = 0;
+				img.width = img.height = canvas.width = canvas.height = 0;
 
 				while (info.firstChild) {
 					info.removeChild(info.firstChild);
@@ -90,16 +92,28 @@
 
 				iterate(image, '');
 
-				var renderLink = document.createElement('a');
-				renderLink.href = '#';
-				renderLink.innerHTML = 'Render';
-				renderLink.addEventListener('click', function (event) {
-					longOperation('rendering', function (done) {
-						drawToCanvas(bmp, image);
-						done();
-					});
-					event.preventDefault();
-				});
+				var viewLink = document.createElement('a');
+				viewLink.href = '#';
+				viewLink.innerHTML = 'View';
+				viewLink.onclick = function (event) {
+					img.width = image.size.horz;
+					img.height = image.size.vert;
+					img.src = bmp.toURI();
+					return false;
+				};
+
+				if (context) {
+					var renderLink = document.createElement('a');
+					renderLink.href = '#';
+					renderLink.innerHTML = 'Render';
+					renderLink.onclick = function (event) {
+						longOperation('rendering', function (done) {
+							drawToCanvas(bmp, image);
+							done();
+						});
+						return false;
+					};
+				}
 
 				var row = info.insertRow(-1);
 
@@ -108,7 +122,10 @@
 				row.appendChild(head);
 
 				var cell = document.createElement('td');
-				cell.appendChild(renderLink);
+				cell.appendChild(viewLink);
+				if (context) {
+					cell.appendChild(renderLink);
+				}
 				row.appendChild(cell);
 			}
 
@@ -141,14 +158,26 @@
 			border-collapse: collapse;
 		}
 
-		canvas {
+		canvas, img {
 			float: left;
 			margin-left: 1em;
+		}
+
+		img {
+			border: 1px dotted green;
+		}
+
+		canvas {
+			border: 1px dotted red;
 		}
 
 		th, td {
 			border: 1px solid #777;
 			padding: 3pt;
+		}
+
+		a {
+			margin: 1pt;
 		}
 	</style>
 </head>
@@ -163,5 +192,6 @@
 		<tbody id="info"></tbody>
 	</table>
 	<canvas id="canvas"></canvas>
+	<img id="img" />
 </body>
 </html>
