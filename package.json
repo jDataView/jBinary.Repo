@@ -1,0 +1,27 @@
+{
+  "name": "jbinary.repo",
+  "version": "1.0.0",
+  "description": "Official repo for jBinary structures.",
+  "keywords": ["buffer", "binary", "file", "structures", "types"],
+  "author": "RReverser <me@rreverser.com> (http://rreverser.com/)",
+  "files": [
+    "jBinary.Repo.js",
+    "associations.js"
+  ],
+  "main": "jBinary.Repo.js",
+  "scripts": {
+    "test": "cd test && node test.runner.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jDataView/jBinary.Repo.git"
+  },
+  "dependencies": {
+    "jBinary": "*"
+  },
+  "devDependencies": {
+    "qunit": "*",
+    "jshint": ">= 2.1.0",
+    "requirejs": "*"
+  }
+}

@@ -1,4 +1,4 @@
-(function () {
+define(function () {
 
 var descriptors = {
 	bmp: {
@@ -42,8 +42,6 @@ for (var name in descriptors) {
 	mergeDescriptorList(name, 'mimeTypes');
 }
 
-jBinary.Repo.getAssociations = function (callback) {
-	callback(associations);
-};
+return associations;
 
-})();
+});

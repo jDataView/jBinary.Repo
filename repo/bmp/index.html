@@ -21,28 +21,6 @@
 				});
 			}
 
-			function drawToCanvas(bmp, image) {
-				if (!image.pixelData) {
-					throw new TypeError('Sorry, but RLE compressed images are not supported.');
-				}
-
-				var imgData = context.createImageData(image.size.horz, image.size.vert);
-
-				if ('set' in imgData.data) {
-					imgData.data.set(image.pixelData);
-				} else {
-					for (var i = 0, length = image.pixelData.length; i < length; i++) {
-						imgData.data[i] = image.pixelData[i];
-					}
-				}
-
-				canvas.width = imgData.width;
-				canvas.height = imgData.height;
-
-				// putting image data to given canvas context
-				context.putImageData(imgData, 0, 0);
-			}
-
 			function handleData(err, data) {
 				if (err) {
 					return alert(err);
@@ -73,7 +51,9 @@
 						if (value.constructor === Object) {
 							iterate(value, prefix + key + '.');
 						} else {
-							if (value.constructor === Array) {
+							if (value instanceof Function) {
+								value = 'function';
+							} else if (value instanceof Object && 'length' in value) {
 								value = '[...]';
 							}
 
@@ -96,9 +76,7 @@
 				viewLink.href = '#';
 				viewLink.innerHTML = 'View';
 				viewLink.onclick = function (event) {
-					img.width = image.size.horz;
-					img.height = image.size.vert;
-					img.src = bmp.toURI();
+					image.toImage(img);
 					return false;
 				};
 
@@ -108,7 +86,7 @@
 					renderLink.innerHTML = 'Render';
 					renderLink.onclick = function (event) {
 						longOperation('rendering', function (done) {
-							drawToCanvas(bmp, image);
+							image.toCanvas(canvas);
 							done();
 						});
 						return false;
