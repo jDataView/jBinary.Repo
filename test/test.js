@@ -94,103 +94,108 @@ requirejs.config({
 	}
 });
 
+asyncTest('Loading Repo', function () {
 requirejs(['jBinary', 'jBinary.Repo'], function (jBinary, Repo) {
+	start();
+	ok(Repo);
 
-//-----------------------------------------------------------------
+	var module = QUnit.module;
 
-module('Loading from Repo');
+	//-----------------------------------------------------------------
 
-asyncTest('List of names', function () {
-	jBinary.Repo(['bmp', 'mp3'], function (BMP, MP3) {
-		start();
-		equal(this, jBinary.Repo);
-		ok(BMP); equal(this.BMP, BMP);
-		ok(MP3); equal(this.MP3, MP3);
-	});
-});
+	module('Loading from Repo');
 
-asyncTest('Single name', function () {
-	jBinary.Repo('bmp', function (BMP) {
-		start();
-		equal(this, jBinary.Repo);
-		ok(BMP); equal(this.BMP, BMP);
-	});
-});
-
-asyncTest('Cached type', function () {
-	jBinary.Repo('bmp', function (BMP) {
-		jBinary.Repo('bmp', function (BMP2) {
+	asyncTest('List of names', function () {
+		Repo(['bmp', 'mp3'], function (BMP, MP3) {
 			start();
-			equal(BMP, BMP2);
+			equal(this, Repo);
+			ok(BMP); equal(this.BMP, BMP);
+			ok(MP3); equal(this.MP3, MP3);
+		});
+	});
+
+	asyncTest('Single name', function () {
+		Repo('bmp', function (BMP) {
+			start();
+			equal(this, Repo);
+			ok(BMP); equal(this.BMP, BMP);
+		});
+	});
+
+	asyncTest('Cached type', function () {
+		Repo('bmp', function (BMP) {
+			Repo('bmp', function (BMP2) {
+				start();
+				equal(BMP, BMP2);
+			});
+		});
+	});
+
+	//-----------------------------------------------------------------
+
+	module('File associations');
+
+	asyncTest('Loading list', function () {
+		Repo.getAssociations(function (assoc) {
+			start();
+			ok(assoc);
+			ok(assoc.extensions);
+			ok(assoc.mimeTypes);
+
+			// check caching
+			stop();
+			Repo.getAssociations(function (assoc2) {
+				start();
+				equal(assoc, assoc2);
+			});
+		});
+	});
+
+	asyncTest('By file extension', function () {
+		Repo.getAssociation({name: 'sample.mp3'}, function (typeSet) {
+			start();
+			ok(typeSet);
+			equal(typeSet, Repo.MP3);
+		});
+	});
+
+	asyncTest('By mime-type', function () {
+		Repo.getAssociation({type: 'image/bmp'}, function (typeSet) {
+			start();
+			ok(typeSet);
+			equal(typeSet, Repo.BMP);
+		});
+	});
+
+	//-----------------------------------------------------------------
+
+	module('Loading data');
+
+	asyncTest('load with given typeSet', function () {
+		jBinary.load('123.tar', 'tar', function (err, binary) {
+			start();
+			ok(!err);
+			equal(binary.view.byteLength, 512);
+			equal(binary.typeSet.File, Repo.TAR.File);
+		});
+	});
+
+	asyncTest('load with auto-detection by file name extension', function () {
+		jBinary.load('123.tar', function (err, binary) {
+			start();
+			ok(!err);
+			equal(binary.view.byteLength, 512);
+			equal(binary.typeSet.File, Repo.TAR.File);
+		});
+	});
+
+	asyncTest('load with auto-detection by mime-type', function () {
+		jBinary.load('data:application/x-tar;base64,MTIzLnR4dAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAwMDA2NDQAMDAwMDc2NAAwMDAxMDQwADAwMDAwMDAwMDAwADEyMTY0MTY0NzUzADAxMzYyMwAgMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1c3RhciAgAFJSZXZlcnNlcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQWRtaW5pc3RyYXRvcnMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=', function (err, binary) {
+			start();
+			ok(!err);
+			equal(binary.view.byteLength, 512);
+			equal(binary.typeSet.File, Repo.TAR.File);
 		});
 	});
 });
-
-//-----------------------------------------------------------------
-
-module('File associations');
-
-asyncTest('Loading list', function () {
-	jBinary.Repo.getAssociations(function (assoc) {
-		start();
-		ok(assoc);
-		ok(assoc.extensions);
-		ok(assoc.mimeTypes);
-
-		// check caching
-		stop();
-		jBinary.Repo.getAssociations(function (assoc2) {
-			start();
-			equal(assoc, assoc2);
-		});
-	});
-});
-
-asyncTest('By file extension', function () {
-	jBinary.Repo.getAssociation({name: 'sample.mp3'}, function (typeSet) {
-		start();
-		ok(typeSet);
-		equal(typeSet, jBinary.Repo.MP3);
-	});
-});
-
-asyncTest('By mime-type', function () {
-	jBinary.Repo.getAssociation({type: 'image/bmp'}, function (typeSet) {
-		start();
-		ok(typeSet);
-		equal(typeSet, jBinary.Repo.BMP);
-	});
-});
-
-//-----------------------------------------------------------------
-
-module('Loading data');
-
-asyncTest('load with given typeSet', function () {
-	jBinary.load('123.tar', 'tar', function (err, binary) {
-		start();
-		ok(!err);
-		equal(binary.view.byteLength, 512);
-		equal(binary.typeSet.File, jBinary.Repo.TAR.File);
-	});
-});
-
-asyncTest('load with auto-detection by file name extension', function () {
-	jBinary.load('123.tar', function (err, binary) {
-		start();
-		ok(!err);
-		equal(binary.view.byteLength, 512);
-		equal(binary.typeSet.File, jBinary.Repo.TAR.File);
-	});
-});
-
-asyncTest('load with auto-detection by mime-type', function () {
-	jBinary.load('data:application/x-tar;base64,MTIzLnR4dAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAwMDA2NDQAMDAwMDc2NAAwMDAxMDQwADAwMDAwMDAwMDAwADEyMTY0MTY0NzUzADAxMzYyMwAgMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1c3RhciAgAFJSZXZlcnNlcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQWRtaW5pc3RyYXRvcnMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=', function (err, binary) {
-		start();
-		ok(!err);
-		equal(binary.view.byteLength, 512);
-		equal(binary.typeSet.File, jBinary.Repo.TAR.File);
-	});
-});
-
 });

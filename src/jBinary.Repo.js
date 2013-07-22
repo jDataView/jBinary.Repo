@@ -1,9 +1,10 @@
-define(['require', 'jBinary'], function (require, jBinary) {
+(function (define) {
 
 'use strict';
 
-// var repoUrl = 'https://rawgithub.com/jDataView/jBinary.Repo/gh-pages/repo/';
-var rootUrl = '../';
+define('jBinary.Repo', ['require', 'jBinary'], function (requirejs, jBinary) {
+
+var rootUrl = 'https://rawgithub.com/jDataView/jBinary.Repo/gh-pages/';
 
 var Repo = jBinary.Repo = function (names, callback) {
 	if (!(names instanceof Array)) {
@@ -19,7 +20,7 @@ var Repo = jBinary.Repo = function (names, callback) {
 		return url;
 	});
 
-	require(urls, function () {
+	requirejs(urls, function () {
 		for (var i = 0, length = arguments.length; i < length; i++) {
 			Repo[names[i].toUpperCase()] = arguments[i];
 		}
@@ -29,7 +30,7 @@ var Repo = jBinary.Repo = function (names, callback) {
 
 Repo.getAssociations = function (callback) {
 	// lazy loading data by replacing `jBinary.Repo.getAssociations` itself
-	require([rootUrl + 'associations.js'], function (associations) {
+	requirejs([rootUrl + 'associations.js'], function (associations) {
 		callback.call(Repo, associations);
 	});
 };
@@ -105,3 +106,5 @@ jBinary.load = function (source, typeSet, callback) {
 return Repo;
 
 });
+
+})(this.define || require('requirejs').define);
