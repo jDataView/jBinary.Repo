@@ -16,18 +16,20 @@ define('jBinary.Repo', ['require', 'module', 'jBinary'], function (requirejs, mo
 		});
 	};
 
-	Repo.load = function (name, requirejs, onLoad) {
-		var upperName = name.toUpperCase();
+	Repo.normalize = function (name) {
+		return name.toUpperCase();
+	};
 
-		if (upperName in Repo) {
-			return onLoad(Repo[upperName]);
+	Repo.load = function (name, requirejs, onLoad) {
+		if (name in Repo) {
+			return onLoad(Repo[name]);
 		}
 
 		var lowerName = name.toLowerCase(),
 			url = getRootUrl() + 'repo/' + lowerName + '/' + lowerName + '.js';
 
 		return requirejs([url], function (typeSet) {
-			onLoad(typeSet ? Repo[upperName] = typeSet : Repo[upperName]);
+			onLoad(Repo[name] = typeSet);
 		});
 	};
 
