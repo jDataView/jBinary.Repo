@@ -26,19 +26,19 @@ define('jBinary.Repo', ['require', 'module', 'jBinary'], function (requirejs, mo
 		}
 
 		var lowerName = name.toLowerCase(),
-			url = getRootUrl() + 'repo/' + lowerName + '/' + lowerName + '.js';
+			url = getRepoUrl() + lowerName + '/' + lowerName + '.js';
 
 		return requirejs([url], function (typeSet) {
 			onLoad(Repo[name] = typeSet);
 		});
 	};
 
-	function getRootUrl() {
-		return module.config().root || '../';
+	function getRepoUrl() {
+		return module.config().repo || '../repo/';
 	}
 
 	Repo.getAssociations = function (callback) {
-		requirejs([getRootUrl() + 'associations.js'], function (associations) {
+		requirejs([getRepoUrl() + 'associations.js'], function (associations) {
 			callback.call(Repo, associations);
 		});
 	};
