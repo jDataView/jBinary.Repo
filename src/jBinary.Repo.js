@@ -1,10 +1,8 @@
-(function (define) {
+define('jBinary.Repo', ['require', 'jBinary'], function (requirejs, jBinary) {
 
 'use strict';
 
-define('jBinary.Repo', ['require', 'jBinary'], function (requirejs, jBinary) {
-
-var rootUrl = 'https://rawgithub.com/jDataView/jBinary.Repo/gh-pages/';
+var rootUrl = '../';
 
 var Repo = jBinary.Repo = function (names, callback) {
 	if (!(names instanceof Array)) {
@@ -106,5 +104,3 @@ jBinary.load = function (source, typeSet, callback) {
 return Repo;
 
 });
-
-})(this.define || require('requirejs').define);

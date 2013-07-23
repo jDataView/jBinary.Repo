@@ -23,14 +23,12 @@ var descriptors = {
 	}
 };
 
-var associations = {
-	extensions: {},
-	mimeTypes: {}
-};
+var associations = {};
 
 function mergeDescriptorList(name, listName) {
 	var list = descriptors[name][listName];
 	if (list) {
+		associations[listName] = associations[listName] || {};
 		for (var i = 0, length = list.length; i < length; i++) {
 			associations[listName][list[i]] = name;
 		}

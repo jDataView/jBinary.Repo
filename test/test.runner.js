@@ -12,6 +12,6 @@ testrunner.setup({
 });
 
 testrunner.run({
-	code: '../src/jBinary.Repo.js',
-	tests: './test.js'
+	code: 'dummy.js',
+	tests: 'test.js'
 });
