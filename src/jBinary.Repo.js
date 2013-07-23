@@ -10,12 +10,16 @@ var Repo = jBinary.Repo = function (names, callback) {
 	}
 
 	var urls = names.map(function (name) {
-		var lowerName = name.toLowerCase(), upperName = name.toUpperCase();
-		var url = rootUrl + 'repo/' + lowerName + '/' + lowerName + '.js';
-		if (upperName in jBinary.Repo) {
-			define(url, jBinary.Repo[upperName]);
+		if (name.indexOf('/') < 0) {
+			var lowerName = name.toLowerCase(), upperName = name.toUpperCase();
+			var url = rootUrl + 'repo/' + lowerName + '/' + lowerName + '.js';
+			if (upperName in jBinary.Repo) {
+				define(url, jBinary.Repo[upperName]);
+			}
+			return url;
+		} else {
+			return name;
 		}
-		return url;
 	});
 
 	requirejs(urls, function () {
