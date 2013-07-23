@@ -1,13 +1,17 @@
 define('jBinary.Repo', ['require', 'module', 'jBinary'], function (requirejs, module, jBinary) {
 	'use strict';
 
+	function getRepoUrl() {
+		return module.config().repo || '../repo/';
+	}
+
 	var Repo = jBinary.Repo = function (names, callback) {
 		names = names instanceof Array ? names.slice() : [names];
 
 		for (var i = 0, length = names.length; i < length; i++) {
 			var name = names[i];
 			if (name.indexOf('/') < 0) {
-				names[i] = 'jBinary.Repo!' + name;
+				names[i] = module.id + '!' + name;
 			}
 		}
 
@@ -32,10 +36,6 @@ define('jBinary.Repo', ['require', 'module', 'jBinary'], function (requirejs, mo
 			onLoad(Repo[name] = typeSet);
 		});
 	};
-
-	function getRepoUrl() {
-		return module.config().repo || '../repo/';
-	}
 
 	Repo.getAssociations = function (callback) {
 		requirejs([getRepoUrl() + 'associations.js'], function (associations) {
