@@ -131,6 +131,15 @@ requirejs(['jBinary', 'jBinary.Repo'], function (jBinary, Repo) {
 		});
 	});
 
+	asyncTest('Require.JS load', function () {
+		Repo('bmp', function (BMP) {
+			requirejs(['jBinary.Repo!BMP'], function (BMP2) {
+				start();
+				equal(BMP, BMP2);
+			});
+		});
+	});
+
 	//-----------------------------------------------------------------
 
 	module('File associations');
