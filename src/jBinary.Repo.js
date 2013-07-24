@@ -1,8 +1,6 @@
 define(['require', 'module', 'jBinary'], function (requirejs, module, jBinary) {
 	'use strict';
 
-	console.log(module);
-
 	function getRepoUrl() {
 		return module.config().repo || '../repo/';
 	}
