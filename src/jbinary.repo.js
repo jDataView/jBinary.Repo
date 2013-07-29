@@ -1,4 +1,4 @@
-define(['require', 'module', 'jBinary'], function (requirejs, module, jBinary) {
+define(['require', 'module', 'jbinary'], function (requirejs, module, jBinary) {
 	'use strict';
 
 	function getRepoUrl() {

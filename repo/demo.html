@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script data-main="demo" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.8/require.min.js"></script>
+		<script>
+			require(['demo'], function (viewModel) {
+				viewModel.type('gzip');
+				viewModel.files(['sample.tar.gz']);
+			});
+		</script>
+		<script id="data-info" type="text/html">
+			<!-- ko if: $data instanceof Object -->
+				<table data-bind="foreach: $root.object2array($data)">
+					<tr>
+						<th data-bind="text: key"></th>
+						<td data-bind="template: {name: 'data-info', data: value}"></td>
+					</tr>
+				</table>
+			<!-- /ko -->
+			<!-- ko ifnot: $data instanceof Object -->
+				<!-- ko text: ko.utils.stringifyJson($data) --><!-- /ko -->
+			<!-- /ko -->
+		</script>
+		<style>
+			table {
+				border: 1px solid #777;
+				border-collapse: collapse;
+			}
+			
+			td, th {
+				text-align: left;
+				vertical-align: top;
+				border: 1px solid #777;
+				padding: 2pt;
+			}
+
+			#fileSection {
+				padding-bottom: 2pt;
+			}
+
+			#linksSection {
+				display: inline-block;
+				margin-top: 0;
+				padding-left: 0;
+				vertical-align: top;
+				list-style-type: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="fileSection" data-bind="if: typeof File !== 'undefined'">
+			<label for="file">Choose&nbsp;<span data-bind="text: type"></span>&nbsp;file: </label><input type="file" data-bind="event: {change: loadFromFile}" /><br />
+			<small>or</small>
+		</div>
+		Load&nbsp;<span data-bind="text: type"></span>&nbsp;sample:
+		<ul id="linksSection" data-bind="click: loadFromLink, clickBubble: false, foreach: files">
+			<li>
+				<a data-bind="text: $data, attr: {href: $root.type() + '/' + $data}"></a>
+			</li>
+		</ul>
+		<hr />
+		<div data-bind="template: {name: 'data-info', data: data}"></div>
+		<!-- ko partial: $root.type() + '/demo.html' --><!-- /ko -->
+	</body>
+</html>

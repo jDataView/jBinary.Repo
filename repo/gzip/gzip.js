@@ -1,7 +1,8 @@
-define(['jBinary'], function (jBinary) {
+define(['jbinary'], function (jBinary) {
 	return {
 		'jBinary.littleEndian': true,
 		'jBinary.mimeType': 'application/x-gzip',
+		'jBinary.all': 'File',
 
 		Flag: jBinary.Template({
 			baseType: 1,
