@@ -4,10 +4,10 @@
 	dir: "dist",
 	baseUrl: "..",
 	paths: {
-		'jBinary': '../jBinary/src/jBinary',
-		'jDataView': '../jDataView/src/jDataView',
-		'jBinary.Repo': 'src/jBinary.Repo'
+		'jbinary': '../jBinary/src/jbinary',
+		'jdataview': '../jDataView/src/jdataview',
+		'jbinary.repo': 'src/jbinary.repo'
 	},
-	name: 'jBinary.Repo',
+	name: 'jbinary.repo',
 	fileExclusionRegExp: /^\.jshintrc$/
 })
