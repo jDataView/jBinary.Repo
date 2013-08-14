@@ -25,7 +25,10 @@ require.config({
 
 define(['require', 'knockout'], function (require, ko) {
 	ko.bindingHandlers.partial = {
-		update: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+		init: function () {
+			return {controlsDescendantBindings: true};
+		},
+		update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 			var url = ko.unwrap(valueAccessor());
 
 			if (!url) return;
@@ -44,15 +47,57 @@ define(['require', 'knockout'], function (require, ko) {
 			
 			require([id], function () {
 				ko.applyBindingsToNode(element, {
-					template: url
-				})
+					template: {
+						name: id,
+						data: bindingContext.$data
+					}
+				}, bindingContext.$root);
 			}, function () {});
 		}
 	};
 	ko.virtualElements.allowedBindings.partial = true;
 
+	ko.bindingHandlers.download = {
+		init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+			function getInfo(propName) {
+				return ko.unwrap(valueAccessor())[propName];
+			}
+
+			var blob;
+
+			ko.applyBindingsToNode(element, {
+				text: ko.computed(function () {
+					return getInfo('label') || 'Download';
+				}),
+				attr: {
+					href: '#',
+					download: ko.computed(function () {
+						return (getInfo('name') || '').replace(/.*\/(.*)$/, '$1');
+					})
+				},
+				event: {
+					click: function (viewModel, event) {
+						if (!/#$/.test(element.href)) return true;
+
+						var binary = getInfo('binary');
+
+						// handy method, but only in IE10 as for now :(
+						if ('msSaveOrOpenBlob' in navigator) {
+							navigator.msSaveBlob((blob || (blob = new Blob([binary.read('blob', 0)]))), element.download);
+						} else {
+							element.href = binary.toURI();
+							element.target = '_blank';
+							return true;
+						}
+					}
+				}
+			});
+		}
+	};
+
 	var viewModel = {
 		type: ko.observable(''),
+		isTypeResolved: ko.observable(false),
 		files: ko.observable([]),
 		binary: ko.observable(null)
 	};
@@ -63,7 +108,10 @@ define(['require', 'knockout'], function (require, ko) {
 	});
 
 	viewModel.object2array = function (object) {
+		if (object instanceof Function) return [];
+
 		var array = [];
+
 		ko.utils.objectForEach(ko.unwrap(object), function (key, value) {
 			if (key > 16 || key.charAt(0) === '_') return;
 			array.push({
@@ -71,16 +119,18 @@ define(['require', 'knockout'], function (require, ko) {
 				value: key == 16 ? '...' : value
 			});
 		});
+
 		return array;
 	};
 
 	viewModel.loadData = function (source) {
-		var binary = viewModel.binary;
-		binary(null);
-		require(['jbinary', 'jbinary.repo'], function (jBinary) {
-			jBinary.load(source, viewModel.type(), function (err, _binary) {
+		viewModel.binary(null);
+		viewModel.isTypeResolved(false);
+		require(['jbinary', 'jbinary.repo!' + viewModel.type()], function (jBinary, typeSet) {
+			viewModel.isTypeResolved(true);
+			jBinary.load(source, typeSet, function (err, _binary) {
 				if (err) return alert(err);
-				binary(_binary);
+				viewModel.binary(_binary);
 			});
 		});
 	};
@@ -92,7 +142,7 @@ define(['require', 'knockout'], function (require, ko) {
 		}
 	};
 
-	viewModel.loadFromFile = function () {
+	viewModel.loadFromFile = function (viewModel, event) {
 		var target = event.target || event.srcElement;
 		viewModel.loadData(target.files[0]);
 	};
@@ -104,6 +154,8 @@ define(['require', 'knockout'], function (require, ko) {
 
 		ko.applyBindings(viewModel);
 	});
+
+	require(['text', 'jbinary.repo']); // prefetch
 
 	return viewModel;
 });

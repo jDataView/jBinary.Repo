@@ -9,17 +9,21 @@
 			});
 		</script>
 		<script id="data-info" type="text/html">
-			<!-- ko if: $data instanceof Object -->
-				<table data-bind="foreach: $root.object2array($data)">
-					<tr>
-						<th data-bind="text: key"></th>
-						<td data-bind="template: {name: 'data-info', data: value}"></td>
-					</tr>
+			<!-- ko if: value instanceof Object && !(value instanceof Date) -->
+				<table>
+					<caption data-bind="visible: value.constructor !== Object, text: value.constructor.name + ('length' in value ? '[' + value.length + ']' : '')"></caption>
+					<tbody data-bind="foreach: $root.object2array(value)">
+						<tr>
+							<th data-bind="text: key"></th>
+							<td data-bind="template: {name: 'data-info', data: {key: key, value: value instanceof Function && value['jBinary.Lazy'] ? value() : value}}"></td>
+						</tr>
+					</tbody>
 				</table>
 			<!-- /ko -->
-			<!-- ko ifnot: $data instanceof Object -->
-				<!-- ko text: ko.utils.stringifyJson($data) --><!-- /ko -->
+			<!-- ko ifnot: value instanceof Object && !(value instanceof Date) -->
+				<!-- ko text: ko.utils.stringifyJson(value) --><!-- /ko -->
 			<!-- /ko -->
+			<!-- ko partial: $root.type() + '/demo.html' --><!-- /ko -->
 		</script>
 		<style>
 			table {
@@ -27,6 +31,10 @@
 				border-collapse: collapse;
 			}
 			
+			caption {
+				font-weight: bold;
+			}
+
 			td, th {
 				text-align: left;
 				vertical-align: top;
@@ -59,7 +67,8 @@
 			</li>
 		</ul>
 		<hr />
-		<div data-bind="template: {name: 'data-info', data: data}"></div>
-		<!-- ko partial: $root.type() + '/demo.html' --><!-- /ko -->
+		<!-- ko if: isTypeResolved -->
+			<div data-bind="template: {name: 'data-info', data: {value: data()}}"></div>
+		<!-- /ko -->
 	</body>
 </html>

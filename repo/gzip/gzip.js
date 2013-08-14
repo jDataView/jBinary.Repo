@@ -1,4 +1,18 @@
-define(['jbinary'], function (jBinary) {
+require.config({
+	paths: {
+		jsdeflate: '//rawgithub.com/dankogai/js-deflate/master'
+	},
+	shim: {
+		'jsdeflate/rawinflate': {
+			exports: 'RawDeflate.inflate'
+		},
+		'jsdeflate/rawdeflate': {
+			exports: 'RawDeflate.deflate'
+		}
+	}
+});
+
+define(['jbinary', 'jsdeflate/rawinflate', 'jsdeflate/rawdeflate'], function (jBinary, inflate, deflate) {
 	return {
 		'jBinary.littleEndian': true,
 		'jBinary.mimeType': 'application/x-gzip',
@@ -18,6 +32,16 @@ define(['jbinary'], function (jBinary) {
 				if (context[this.flagName]) {
 					return this.baseRead();
 				}
+			}
+		}),
+
+		CompressedData: jBinary.Template({
+			baseType: 'string',
+			read: function () {
+				return new jBinary(inflate(this.baseRead()));
+			},
+			write: function (binary) {
+				this.baseWrite(deflate(binary.read('string')));
 			}
 		}),
 
@@ -75,7 +99,7 @@ define(['jbinary'], function (jBinary) {
 			name: ['FlagDependency', '_hasName', 'string0'],
 			comment: ['FlagDependency', '_hasComment', 'string0'],
 			headerCRC: ['FlagDependency', '_hasHeaderCRC', 'uint16'],
-			compressed_binary: ['binary', function () { return this.binary.view.byteLength - 8 - this.binary.tell() }],
+			content: ['lazy', 'CompressedData', function () { return this.binary.view.byteLength - 8 - this.binary.tell() }],
 			crc32: 'uint32',
 			input_size: 'uint32'
 		}
