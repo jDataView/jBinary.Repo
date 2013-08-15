@@ -13,7 +13,7 @@ if (hasNodeRequire) {
 if (typeof JSHINT !== 'undefined') {
 	asyncTest('JSHint', function () {
 		var paths = {
-			source: '../src/jBinary.Repo.js',
+			source: '../src/jbinary.repo.js',
 			options: '../src/.jshintrc'
 		},
 		contents = {};
@@ -85,17 +85,26 @@ if (typeof JSHINT !== 'undefined') {
 	});
 }
 
-requirejs.config({
-	baseUrl: '..',
+require.config({
 	paths: {
-		'jBinary': '../jBinary/src/jBinary',
-		'jDataView': '../jDataView/src/jDataView',
-		'jBinary.Repo': 'src/jBinary.Repo'
+		'jdataview': [
+			'../../jDataView/src/jdataview',
+			'//raw.github.com/jDataView/jDataView/master/src/jdataview'
+		],
+		'jbinary': [
+			'../../jBinary/src/jbinary',
+			'//raw.github.com/jDataView/jBinary/master/src/jbinary'
+		],
+		'jbinary.repo': [
+			'../src/jbinary.repo',
+			'//raw.github.com/jDataView/jBinary.Repo/master/src/jbinary.repo'
+		],
+		'jbinary.repo.typeSets': 'jbinary.repo/../../typeSets'
 	}
 });
 
 asyncTest('Loading Repo', function () {
-requirejs(['jBinary', 'jBinary.Repo'], function (jBinary, Repo) {
+requirejs(['jbinary', 'jbinary.repo'], function (jBinary, Repo) {
 	start();
 	ok(Repo);
 
@@ -109,8 +118,8 @@ requirejs(['jBinary', 'jBinary.Repo'], function (jBinary, Repo) {
 		Repo(['bmp', 'mp3'], function (BMP, MP3) {
 			start();
 			equal(this, Repo);
-			ok(BMP); equal(this.BMP, BMP);
-			ok(MP3); equal(this.MP3, MP3);
+			ok(BMP); equal(BMP['jBinary.mimeType'], 'image/bmp');
+			ok(MP3); equal(MP3['jBinary.mimeType'], 'audio/mpeg');
 		});
 	});
 
@@ -118,7 +127,7 @@ requirejs(['jBinary', 'jBinary.Repo'], function (jBinary, Repo) {
 		Repo('bmp', function (BMP) {
 			start();
 			equal(this, Repo);
-			ok(BMP); equal(this.BMP, BMP);
+			ok(BMP); equal(BMP['jBinary.mimeType'], 'image/bmp');
 		});
 	});
 
@@ -133,7 +142,7 @@ requirejs(['jBinary', 'jBinary.Repo'], function (jBinary, Repo) {
 
 	asyncTest('Require.JS load', function () {
 		Repo('bmp', function (BMP) {
-			requirejs(['jBinary.Repo!BMP'], function (BMP2) {
+			requirejs(['jbinary.repo.typeSets/bmp'], function (BMP2) {
 				start();
 				equal(BMP, BMP2);
 			});
@@ -164,7 +173,7 @@ requirejs(['jBinary', 'jBinary.Repo'], function (jBinary, Repo) {
 		Repo.getAssociation({name: 'sample.mp3'}, function (typeSet) {
 			start();
 			ok(typeSet);
-			equal(typeSet, Repo.MP3);
+			equal(typeSet['jBinary.mimeType'], 'audio/mpeg');
 		});
 	});
 
@@ -172,7 +181,7 @@ requirejs(['jBinary', 'jBinary.Repo'], function (jBinary, Repo) {
 		Repo.getAssociation({type: 'image/bmp'}, function (typeSet) {
 			start();
 			ok(typeSet);
-			equal(typeSet, Repo.BMP);
+			equal(typeSet['jBinary.mimeType'], 'image/bmp');
 		});
 	});
 
@@ -185,7 +194,7 @@ requirejs(['jBinary', 'jBinary.Repo'], function (jBinary, Repo) {
 			start();
 			ok(!err);
 			equal(binary.view.byteLength, 512);
-			equal(binary.typeSet.File, Repo.TAR.File);
+			equal(binary.typeSet['jBinary.mimeType'], 'application/x-tar');
 		});
 	});
 
@@ -194,7 +203,7 @@ requirejs(['jBinary', 'jBinary.Repo'], function (jBinary, Repo) {
 			start();
 			ok(!err);
 			equal(binary.view.byteLength, 512);
-			equal(binary.typeSet.File, Repo.TAR.File);
+			equal(binary.typeSet['jBinary.mimeType'], 'application/x-tar');
 		});
 	});
 
@@ -203,7 +212,7 @@ requirejs(['jBinary', 'jBinary.Repo'], function (jBinary, Repo) {
 			start();
 			ok(!err);
 			equal(binary.view.byteLength, 512);
-			equal(binary.typeSet.File, Repo.TAR.File);
+			equal(binary.typeSet['jBinary.mimeType'], 'application/x-tar');
 		});
 	});
 });

@@ -1,17 +1,13 @@
 define(['require', 'module', 'jbinary'], function (requirejs, module, jBinary) {
 	'use strict';
 
-	function getRepoUrl() {
-		return module.config().repo || '../repo/';
-	}
-
 	var Repo = jBinary.Repo = function (names, callback) {
 		names = names instanceof Array ? names.slice() : [names];
 
 		for (var i = 0, length = names.length; i < length; i++) {
 			var name = names[i];
 			if (name.indexOf('/') < 0) {
-				names[i] = module.id + '!' + name;
+				names[i] = 'jbinary.repo.typeSets/' + name;
 			}
 		}
 
@@ -20,25 +16,8 @@ define(['require', 'module', 'jbinary'], function (requirejs, module, jBinary) {
 		});
 	};
 
-	Repo.normalize = function (name) {
-		return name.toUpperCase();
-	};
-
-	Repo.load = function (name, requirejs, onLoad) {
-		if (name in Repo) {
-			return onLoad(Repo[name]);
-		}
-
-		var lowerName = name.toLowerCase(),
-			url = getRepoUrl() + lowerName + '/' + lowerName + '.js';
-
-		return requirejs([url], function (typeSet) {
-			onLoad(Repo[name] = typeSet);
-		});
-	};
-
 	Repo.getAssociations = function (callback) {
-		requirejs([getRepoUrl() + 'associations.js'], function (associations) {
+		requirejs(['jbinary.repo.typeSets/associations'], function (associations) {
 			callback.call(Repo, associations);
 		});
 	};

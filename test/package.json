@@ -1,0 +1,12 @@
+{
+  "main": "test.js",
+  "dependencies": {
+    "requirejs": "*",
+    "qunit": "~0.5.16",
+    "jshint": "*"
+  },
+  "scripts": {
+    "test": "node test.runner",
+    "start": "npm test"
+  }
+}

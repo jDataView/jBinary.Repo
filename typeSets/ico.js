@@ -1,7 +1,7 @@
-define(['jBinary'], function (jBinary) {
+define(['jbinary'], function (jBinary) {
 	return {
 		'jBinary.littleEndian': true,
-		'jBinary.mimeType': 'image/bmp',
+		'jBinary.mimeType': 'image/x-icon',
 
 		RGBTriple: {
 			b: 'uint8',
@@ -10,8 +10,56 @@ define(['jBinary'], function (jBinary) {
 		},
 
 		RGBQuad: ['extend', 'RGBTriple', {
-			a: 'uint8'
+			_: ['skip', 1]
 		}],
+
+		// if image dimensions is zero, it means to be 256
+		ImageDimension: jBinary.Template({
+			baseType: 'uint8',
+			read: function () {
+				return this.baseRead() || 256;
+			},
+			write: function (value) {
+				this.baseWrite(value < 256 ? value : 0);
+			}
+		}),
+
+		// helper for dynamic array size calculation
+		ArraySize: jBinary.Template({
+			params: ['baseType', 'array'],
+			write: function (context) {
+				this.baseWrite(context[this.array].length);
+			}
+		}),
+
+		IconDirEntry: {
+			width: 'ImageDimension',
+			height: 'ImageDimension',
+			colorsCount: 'uint8',
+			_reserved: ['skip', 1],
+			planesCount: 'uint16',
+			bpp: 'uint16',
+			dataSize: 'uint32',
+			dataOffset: 'uint32'
+		},
+
+		IconDir: jBinary.Template({
+			baseType: {
+				_reserved: ['skip', 2],
+				_type: ['const', 'uint16', 1, true],
+				_imageCount: ['ArraySize', 'uint16', 'images'],
+				images: ['array', 'IconDirEntry', '_imageCount']
+			},
+			read: function () {
+				return this.baseRead().images;
+			},
+			write: function (images) {
+				this.baseWrite({
+					_imageCount: images.length,
+					images: images
+				});
+			}
+		}),
 
 		Dimensions: {
 			horz: 'uint32',
@@ -87,15 +135,7 @@ define(['jBinary'], function (jBinary) {
 			}
 		}),
 
-		Image: ['object', {
-			// bitmap "magic" signature
-			_signature: ['const', ['string', 2], 'BM', true],
-			// full file Dimensions
-			fileSize: 'uint32',
-			// reserved
-			reserved: 'uint32',
-			// offset of bitmap data
-			dataOffset: 'uint32',
+		IconImage: {
 			// Dimensions of DIB header
 			dibHeaderSize: 'uint32',
 			// image dimensions
@@ -124,65 +164,23 @@ define(['jBinary'], function (jBinary) {
 					return this.baseRead() || context.baseType;
 				}
 			}),
-			// color palette (mandatory for <=8bpp images)
-			palette: ['if', function (context) { return context.bpp <= 8 }, ['array', ['extend', 'RGBTriple', {_padding: ['skip', 1]}], 'colorsCount']],
-			// color masks (needed for 16bpp images)
-			mask: {
-				r: 'uint32',
-				g: 'uint32',
-				b: 'uint32'
-			},
+			palette: ['if', function (context) { return context.bpp <= 8 }, ['array', 'RGBQuad', 'colorsCount']],
 			pixelData: jBinary.Type({
 				read: function (header) {
-					if (header.compression !== 0 && header.compression !== 3) {
-						return null;
-					}
-
-					return this.binary.seek(header.dataOffset, function () {
-						var width = header.size.horz, height = header.size.vert;
-						var data = new jDataView(4 * width * height);
-						var PixelRow = this.getType(['PixelRow', header]);
-						for (var y = height - 1; y > 0; y--) {
-							data.seek(4 * y * width);
-							var colors = this.read(PixelRow);
-							for (var i = 0, length = colors.length; i < length; i++) {
-								var color = colors[i];
-								data.writeBytes([color.r, color.g, color.b, 'a' in color ? color.a : 255]);
-							}
+					var width = header.size.horz, height = header.size.vert / 2;
+					var data = new jDataView(4 * width * height);
+					var PixelRow = this.binary.getType(['PixelRow', header]);
+					for (var y = height - 1; y > 0; y--) {
+						data.seek(4 * y * width);
+						var colors = this.binary.read(PixelRow);
+						for (var i = 0, length = colors.length; i < length; i++) {
+							var color = colors[i];
+							data.writeBytes([color.r, color.g, color.b, 'a' in color ? color.a : 255]);
 						}
-						return data.getBytes(undefined, 0);
-					});
-				}
-			}),
-			_binary: function () { return this.binary }
-		}, {
-			toCanvas: function (canvas) {
-				if (!this.pixelData) {
-					throw new TypeError('Sorry, but RLE compressed images are not supported.');
-				}
-
-				var context = canvas.getContext('2d'),
-					imgData = context.createImageData(this.size.horz, this.size.vert);
-
-				if ('set' in imgData.data) {
-					imgData.data.set(this.pixelData);
-				} else {
-					for (var i = 0, length = this.pixelData.length; i < length; i++) {
-						imgData.data[i] = this.pixelData[i];
 					}
+					return data.getBytes(undefined, 0);
 				}
-
-				canvas.width = imgData.width;
-				canvas.height = imgData.height;
-
-				// putting image data to given canvas context
-				context.putImageData(imgData, 0, 0);
-			},
-			toImage: function (img) {
-				img.width = this.size.horz;
-				img.height = this.size.vert;
-				img.src = this._binary.toURI();
-			}
-		}]
+			})
+		},
 	};
 });

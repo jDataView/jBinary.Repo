@@ -12,14 +12,10 @@ require.config({
 			'../src/jbinary.repo',
 			'//raw.github.com/jDataView/jBinary.Repo/master/src/jbinary.repo'
 		],
+		'jbinary.repo.typeSets': 'jbinary.repo/../../typeSets',
 		'domReady': '//cdnjs.cloudflare.com/ajax/libs/require-domReady/2.0.1/domReady',
 		'text': '//cdnjs.cloudflare.com/ajax/libs/require-text/2.0.5/text',
 		'knockout': '//cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min'
-	},
-	config: {
-		'jbinary.repo': {
-			repo: './'
-		}
 	}
 });
 
@@ -126,7 +122,7 @@ define(['require', 'knockout'], function (require, ko) {
 	viewModel.loadData = function (source) {
 		viewModel.binary(null);
 		viewModel.isTypeResolved(false);
-		require(['jbinary', 'jbinary.repo!' + viewModel.type()], function (jBinary, typeSet) {
+		require(['jbinary', 'jbinary.repo.typeSets/' + viewModel.type()], function (jBinary, typeSet) {
 			viewModel.isTypeResolved(true);
 			jBinary.load(source, typeSet, function (err, _binary) {
 				if (err) return alert(err);

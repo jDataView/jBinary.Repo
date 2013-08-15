@@ -1,4 +1,4 @@
-define(['jBinary'], function (jBinary) {
+define(['jbinary'], function (jBinary) {
 	return {
 		'jBinary.mimeType': 'application/x-tar',
 
