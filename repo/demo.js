@@ -2,15 +2,15 @@ require.config({
 	paths: {
 		'jdataview': [
 			'../../jDataView/src/jdataview',
-			'//rawgithub.com/jDataView/jDataView/master/src/jdataview'
+			'//raw.github.com/jDataView/jDataView/master/src/jdataview'
 		],
 		'jbinary': [
 			'../../jBinary/src/jbinary',
-			'//rawgithub.com/jDataView/jBinary/master/src/jbinary'
+			'//raw.github.com/jDataView/jBinary/master/src/jbinary'
 		],
 		'jbinary.repo': [
 			'../src/jbinary.repo',
-			'//rawgithub.com/jDataView/jBinary.Repo/master/src/jbinary.repo'
+			'//raw.github.com/jDataView/jBinary.Repo/master/src/jbinary.repo'
 		],
 		'domReady': '//cdnjs.cloudflare.com/ajax/libs/require-domReady/2.0.1/domReady',
 		'text': '//cdnjs.cloudflare.com/ajax/libs/require-text/2.0.5/text',

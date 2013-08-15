@@ -1,6 +1,6 @@
 require.config({
 	paths: {
-		jsdeflate: '//rawgithub.com/dankogai/js-deflate/master'
+		jsdeflate: '//raw.github.com/dankogai/js-deflate/master'
 	},
 	shim: {
 		'jsdeflate/rawinflate': {
