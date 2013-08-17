@@ -2,11 +2,6 @@
 <html>
 	<head>
 		<script data-main="demo" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.8/require.min.js"></script>
-		<script>
-			require(['demo'], function (viewModel) {
-				viewModel.type('gzip');
-			});
-		</script>
 		<script id="data-info" type="text/html">
 			<!-- ko if: value instanceof Object && !(value instanceof Date) -->
 				<table>
@@ -52,22 +47,36 @@
 				vertical-align: top;
 				list-style-type: none;
 			}
+
+			.no-ko #main {
+				display: none;
+			}
+
+			#typeSection {
+				float: right;
+			}
 		</style>
 	</head>
-	<body>
-		<div id="fileSection" data-bind="if: typeof File !== 'undefined'">
-			<label for="file">Choose&nbsp;<span data-bind="text: type"></span>&nbsp;file: </label><input type="file" data-bind="event: {change: loadFromFile}" /><br />
-			<small>or</small>
+	<body class="no-ko" data-bind="css: {'no-ko': false}">
+		<div id="typeSection">
+			File type:
+			<select data-bind="optionsCaption: 'Select typeset', options: associations().list, value: type" id="typeSelect">
+				<option>Loading list...</option>
+			</select>
 		</div>
-		Load&nbsp;<span data-bind="text: type"></span>&nbsp;sample:
-		<ul id="linksSection" data-bind="click: loadFromLink, clickBubble: false, foreach: config().files">
-			<li>
-				<a data-bind="text: $data, attr: {href: $root.type() + '/' + $data}"></a>
-			</li>
-		</ul>
-		<hr />
-		<!-- ko if: isTypeResolved -->
+		<div id="main" data-bind="visible: type">
+			<div id="fileSection" data-bind="if: typeof File !== 'undefined'">
+				<label for="file">Choose&nbsp;<span data-bind="text: type"></span>&nbsp;file: </label><input type="file" data-bind="event: {change: loadFromFile}" /><br />
+				<small>or</small>
+			</div>
+			Load&nbsp;<span data-bind="text: type"></span>&nbsp;sample:
+			<ul id="linksSection" data-bind="click: loadFromLink, clickBubble: false, foreach: config().files">
+				<li>
+					<a data-bind="text: $data, attr: {href: $root.type() + '/' + $data}"></a>
+				</li>
+			</ul>
+			<hr />
 			<div data-bind="template: {name: 'data-info', data: {value: data()}}"></div>
-		<!-- /ko -->
+		</div>
 	</body>
 </html>

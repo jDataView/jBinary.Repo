@@ -59,10 +59,10 @@ define(['require', 'knockout'], function (require, ko) {
 	};
 
 	var viewModel = {
+		associations: ko.observable({}),
 		type: ko.observable(''),
 		template: ko.observable({}),
 		config: ko.observable({}),
-		isTypeResolved: ko.observable(false),
 		binary: ko.observable(null)
 	};
 
@@ -88,9 +88,7 @@ define(['require', 'knockout'], function (require, ko) {
 	};
 
 	viewModel.loadData = function (source) {
-		viewModel.isTypeResolved(false);
 		require(['jbinary', 'jbinary.repo!' + viewModel.type()], function (jBinary, typeSet) {
-			viewModel.isTypeResolved(true);
 			jBinary.load(source, typeSet, function (err, _binary) {
 				if (err) return alert(err);
 				viewModel.binary(_binary);
@@ -112,16 +110,24 @@ define(['require', 'knockout'], function (require, ko) {
 
 	ko.computed(function () {
 		var type = viewModel.type();
+
 		document.title = (type ? type.toUpperCase() + ' ' : '') + 'jBinary.Repo demo';
+		viewModel.binary(null);
+
+		if (!type) return;
+
+		viewModel.config({});
+		require([type + '/demo'], viewModel.config);
 	});
 
 	ko.computed(function () {
 		var type = viewModel.type();
-		if (!type) return;
+		
+	});
 
-		viewModel.config({});
-		require([type + '/demo'], viewModel.config, function () {});
-	})
+	require(['jbinary.repo'], function (Repo) {
+		Repo.getAssociations(viewModel.associations);
+	});
 
 	require(['domReady!'], function () {
 		if (!('head' in document)) {

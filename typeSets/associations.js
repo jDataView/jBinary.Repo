@@ -23,7 +23,9 @@ var descriptors = {
 	}
 };
 
-var associations = {};
+var associations = {
+	list: []
+};
 
 function mergeDescriptorList(name, listName) {
 	var list = descriptors[name][listName];
@@ -36,6 +38,7 @@ function mergeDescriptorList(name, listName) {
 }
 
 for (var name in descriptors) {
+	associations.list.push(name);
 	mergeDescriptorList(name, 'extensions');
 	mergeDescriptorList(name, 'mimeTypes');
 }
