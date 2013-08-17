@@ -3,24 +3,6 @@
 	<head>
 		<title>jBinary.Repo demo</title>
 		<script data-main="demo" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.8/require.min.js"></script>
-		<script id="data-info" type="text/html">
-			<!-- ko if: value instanceof Object && !(value instanceof Date) -->
-				<input type="checkbox" data-bind="checked: $data.isOpen = $data.isOpen || ko.observable(value === $root.data()), visible: value !== $root.data() && !(value instanceof Function)" />
-				<b data-bind="text: value.constructor.name + ('length' in value ? '[' + value.length + ']' : '')"></b>
-				<!-- ko if: isOpen -->
-					<ul data-bind="foreach: $root.object2array(value)">
-						<li>
-							<b data-bind="text: key + ': '"></b>
-							<span data-bind="template: {name: 'data-info', data: {key: key, value: value instanceof Function && value['jBinary.Lazy'] ? value() : value}}"></span>
-						</li>
-					</ul>
-				<!-- /ko -->
-			<!-- /ko -->
-			<!-- ko ifnot: value instanceof Object && !(value instanceof Date) -->
-				<!-- ko text: ko.utils.stringifyJson(value) --><!-- /ko -->
-			<!-- /ko -->
-			<!-- ko template: $root.template --><!-- /ko -->
-		</script>
 		<style>
 			ul {
 				list-style: none;
@@ -70,7 +52,7 @@
 				</li>
 			</ul>
 			<hr />
-			<div id="dataSection" data-bind="visible: data, template: {name: 'data-info', data: {key: 'Root', value: data()}}"></div>
+			<div id="dataSection" data-bind="if: data"></div>
 		</div>
 	</body>
 </html>

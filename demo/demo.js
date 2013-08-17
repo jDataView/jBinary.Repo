@@ -13,9 +13,18 @@ require.config({
 			'//raw.github.com/jDataView/jBinary.Repo/master/src/jbinary.repo'
 		],
 		'jbinary.repo.typeSets': 'jbinary.repo/../../typeSets',
+		'prettyPrint': [
+			'../../prettyPrint.js/prettyprint',
+			'//raw.github.com/RReverser/prettyPrint.js/master/prettyprint'
+		],
 		'domReady': '//cdnjs.cloudflare.com/ajax/libs/require-domReady/2.0.1/domReady',
 		'text': '//cdnjs.cloudflare.com/ajax/libs/require-text/2.0.5/text',
 		'knockout': '//cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min'
+	},
+	shim: {
+		'prettyPrint': {
+			exports: 'prettyPrint'
+		}
 	}
 });
 
@@ -98,11 +107,23 @@ define(['require', 'knockout'], function (require, ko) {
 		return array;
 	};
 
+	require(['prettyPrint'], function (prettyPrint) {
+		prettyPrint.config.maxDepth = 1;
+		prettyPrint.config.maxArray = 100;
+		prettyPrint.config.filter = function (key) {
+			return key.charAt(0) !== '_';
+		};
+	});
+
 	viewModel.loadData = function (source) {
-		require(['jbinary', 'jbinary.repo!' + viewModel.type()], function (jBinary, typeSet) {
+		require(['jbinary', 'jbinary.repo!' + viewModel.type(), 'prettyPrint'], function (jBinary, typeSet, prettyPrint) {
 			jBinary.load(source, typeSet, function (err, _binary) {
 				if (err) return alert(err);
 				viewModel.binary(_binary);
+
+				var dataSection = document.getElementById('dataSection');
+				dataSection.innerHTML = '';
+				dataSection.appendChild(prettyPrint(viewModel.data()));
 			});
 		});
 	};
