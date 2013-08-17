@@ -5,7 +5,6 @@
 		<script>
 			require(['demo'], function (viewModel) {
 				viewModel.type('gzip');
-				viewModel.files(['sample.tar.gz']);
 			});
 		</script>
 		<script id="data-info" type="text/html">
@@ -23,7 +22,7 @@
 			<!-- ko ifnot: value instanceof Object && !(value instanceof Date) -->
 				<!-- ko text: ko.utils.stringifyJson(value) --><!-- /ko -->
 			<!-- /ko -->
-			<!-- ko partial: $root.type() + '/demo.html' --><!-- /ko -->
+			<!-- ko template: $root.template --><!-- /ko -->
 		</script>
 		<style>
 			table {
@@ -61,7 +60,7 @@
 			<small>or</small>
 		</div>
 		Load&nbsp;<span data-bind="text: type"></span>&nbsp;sample:
-		<ul id="linksSection" data-bind="click: loadFromLink, clickBubble: false, foreach: files">
+		<ul id="linksSection" data-bind="click: loadFromLink, clickBubble: false, foreach: config().files">
 			<li>
 				<a data-bind="text: $data, attr: {href: $root.type() + '/' + $data}"></a>
 			</li>

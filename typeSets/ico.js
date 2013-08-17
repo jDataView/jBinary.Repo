@@ -1,5 +1,6 @@
 define(['jbinary'], function (jBinary) {
 	return {
+		'jBinary.all': 'IconDir',
 		'jBinary.littleEndian': true,
 		'jBinary.mimeType': 'image/x-icon',
 

@@ -20,39 +20,6 @@ require.config({
 });
 
 define(['require', 'knockout'], function (require, ko) {
-	ko.bindingHandlers.partial = {
-		init: function () {
-			return {controlsDescendantBindings: true};
-		},
-		update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-			var url = ko.unwrap(valueAccessor());
-
-			if (!url) return;
-
-			var id = 'text!' + url;
-
-			if (!document.getElementById(id)) {
-				var script = document.createElement('script');
-				script.id = id;
-				script.type = 'text/html';
-				document.head.appendChild(script);
-				require([id], function (text) {
-					script.text = text;
-				});
-			}
-			
-			require([id], function () {
-				ko.applyBindingsToNode(element, {
-					template: {
-						name: id,
-						data: bindingContext.$data
-					}
-				}, bindingContext.$root);
-			}, function () {});
-		}
-	};
-	ko.virtualElements.allowedBindings.partial = true;
-
 	ko.bindingHandlers.download = {
 		init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 			function getInfo(propName) {
@@ -93,8 +60,9 @@ define(['require', 'knockout'], function (require, ko) {
 
 	var viewModel = {
 		type: ko.observable(''),
+		template: ko.observable({}),
+		config: ko.observable({}),
 		isTypeResolved: ko.observable(false),
-		files: ko.observable([]),
 		binary: ko.observable(null)
 	};
 
@@ -120,9 +88,8 @@ define(['require', 'knockout'], function (require, ko) {
 	};
 
 	viewModel.loadData = function (source) {
-		viewModel.binary(null);
 		viewModel.isTypeResolved(false);
-		require(['jbinary', 'jbinary.repo.typeSets/' + viewModel.type()], function (jBinary, typeSet) {
+		require(['jbinary', 'jbinary.repo!' + viewModel.type()], function (jBinary, typeSet) {
 			viewModel.isTypeResolved(true);
 			jBinary.load(source, typeSet, function (err, _binary) {
 				if (err) return alert(err);
@@ -143,15 +110,46 @@ define(['require', 'knockout'], function (require, ko) {
 		viewModel.loadData(target.files[0]);
 	};
 
+	ko.computed(function () {
+		var type = viewModel.type();
+		document.title = (type ? type.toUpperCase() + ' ' : '') + 'jBinary.Repo demo';
+	});
+
+	ko.computed(function () {
+		var type = viewModel.type();
+		if (!type) return;
+
+		viewModel.config({});
+		require([type + '/demo'], viewModel.config, function () {});
+	})
+
 	require(['domReady!'], function () {
 		if (!('head' in document)) {
 			document.head = document.getElementsByTagName('head')[0];
 		}
 
+		ko.computed(function () {
+			var type = viewModel.type();
+			if (!type) return;
+
+			viewModel.template({});
+
+			var templateUrl = 'text!' + type + '/demo.html';
+
+			require([templateUrl], function (html) {
+				if (!document.getElementById(templateUrl)) {
+					var script = document.createElement('script');
+					script.id = templateUrl;
+					script.type = 'text/html';
+					script.text = html;
+					document.head.appendChild(script);
+				}
+				viewModel.template(templateUrl);
+			}, function () {});
+		});
+
 		ko.applyBindings(viewModel);
 	});
-
-	require(['text', 'jbinary.repo']); // prefetch
 
 	return viewModel;
 });

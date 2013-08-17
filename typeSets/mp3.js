@@ -1,5 +1,6 @@
 define(['jbinary'], function (jBinary) {
 	return {
+		'jBinary.all': 'ID3v1',
 		'jBinary.mimeType': 'audio/mpeg',
 
 		MetaValue: ['string0', 30],
