@@ -108,21 +108,18 @@ define(['require', 'knockout'], function (require, ko) {
 		viewModel.loadData(target.files[0]);
 	};
 
+	var titleSuffix = document.title;
+
 	ko.computed(function () {
 		var type = viewModel.type();
 
-		document.title = (type ? type.toUpperCase() + ' ' : '') + 'jBinary.Repo demo';
+		document.title = (type ? type.toUpperCase() + ' - ' : '') + titleSuffix;
 		viewModel.binary(null);
 
 		if (!type) return;
 
 		viewModel.config({});
 		require([type + '/demo'], viewModel.config);
-	});
-
-	ko.computed(function () {
-		var type = viewModel.type();
-		
 	});
 
 	require(['jbinary.repo'], function (Repo) {
