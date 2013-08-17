@@ -118,8 +118,8 @@ requirejs(['jbinary', 'jbinary.repo'], function (jBinary, Repo) {
 		Repo(['bmp', 'mp3'], function (BMP, MP3) {
 			start();
 			equal(this, Repo);
-			ok(BMP); equal(BMP['jBinary.mimeType'], 'image/bmp');
-			ok(MP3); equal(MP3['jBinary.mimeType'], 'audio/mpeg');
+			ok(BMP); equal(this.BMP, BMP);
+			ok(MP3); equal(this.MP3, MP3);
 		});
 	});
 
@@ -127,7 +127,7 @@ requirejs(['jbinary', 'jbinary.repo'], function (jBinary, Repo) {
 		Repo('bmp', function (BMP) {
 			start();
 			equal(this, Repo);
-			ok(BMP); equal(BMP['jBinary.mimeType'], 'image/bmp');
+			ok(BMP); equal(this.BMP, BMP);
 		});
 	});
 
@@ -142,7 +142,7 @@ requirejs(['jbinary', 'jbinary.repo'], function (jBinary, Repo) {
 
 	asyncTest('Require.JS load', function () {
 		Repo('bmp', function (BMP) {
-			requirejs(['jbinary.repo.typeSets/bmp'], function (BMP2) {
+			requirejs(['jbinary.repo!bmp'], function (BMP2) {
 				start();
 				equal(BMP, BMP2);
 			});
@@ -173,7 +173,7 @@ requirejs(['jbinary', 'jbinary.repo'], function (jBinary, Repo) {
 		Repo.getAssociation({name: 'sample.mp3'}, function (typeSet) {
 			start();
 			ok(typeSet);
-			equal(typeSet['jBinary.mimeType'], 'audio/mpeg');
+			equal(typeSet, Repo.MP3);
 		});
 	});
 
@@ -181,7 +181,7 @@ requirejs(['jbinary', 'jbinary.repo'], function (jBinary, Repo) {
 		Repo.getAssociation({type: 'image/bmp'}, function (typeSet) {
 			start();
 			ok(typeSet);
-			equal(typeSet['jBinary.mimeType'], 'image/bmp');
+			equal(typeSet, Repo.BMP);
 		});
 	});
 
@@ -194,7 +194,7 @@ requirejs(['jbinary', 'jbinary.repo'], function (jBinary, Repo) {
 			start();
 			ok(!err);
 			equal(binary.view.byteLength, 512);
-			equal(binary.typeSet['jBinary.mimeType'], 'application/x-tar');
+			equal(binary.typeSet.File, Repo.TAR.File);
 		});
 	});
 
@@ -203,7 +203,7 @@ requirejs(['jbinary', 'jbinary.repo'], function (jBinary, Repo) {
 			start();
 			ok(!err);
 			equal(binary.view.byteLength, 512);
-			equal(binary.typeSet['jBinary.mimeType'], 'application/x-tar');
+			equal(binary.typeSet.File, Repo.TAR.File);
 		});
 	});
 
@@ -212,7 +212,7 @@ requirejs(['jbinary', 'jbinary.repo'], function (jBinary, Repo) {
 			start();
 			ok(!err);
 			equal(binary.view.byteLength, 512);
-			equal(binary.typeSet['jBinary.mimeType'], 'application/x-tar');
+			equal(binary.typeSet.File, Repo.TAR.File);
 		});
 	});
 });
