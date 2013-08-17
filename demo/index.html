@@ -5,15 +5,18 @@
 		<script data-main="demo" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.8/require.min.js"></script>
 		<script id="data-info" type="text/html">
 			<!-- ko if: value instanceof Object && !(value instanceof Date) -->
-				<table>
-					<caption data-bind="visible: value.constructor !== Object, text: value.constructor.name + ('length' in value ? '[' + value.length + ']' : '')"></caption>
-					<tbody data-bind="foreach: $root.object2array(value)">
-						<tr>
-							<th data-bind="text: key"></th>
-							<td data-bind="template: {name: 'data-info', data: {key: key, value: value instanceof Function && value['jBinary.Lazy'] ? value() : value}}"></td>
-						</tr>
-					</tbody>
-				</table>
+				<!-- ko if: value !== $root.data() -->
+					<input type="checkbox" data-bind="checked: $data.isOpen = $data.isOpen || ko.observable(false), visible: !(value instanceof Function)" />
+					<b data-bind="text: value.constructor.name + ('length' in value ? '[' + value.length + ']' : '')"></b>
+				<!-- /ko -->
+				<!-- ko if: value === $root.data() || isOpen() -->
+					<ul data-bind="foreach: $root.object2array(value)">
+						<li>
+							<b data-bind="text: key + ': '"></b>
+							<span data-bind="template: {name: 'data-info', data: {key: key, value: value instanceof Function && value['jBinary.Lazy'] ? value() : value}}"></span>
+						</li>
+					</ul>
+				<!-- /ko -->
 			<!-- /ko -->
 			<!-- ko ifnot: value instanceof Object && !(value instanceof Date) -->
 				<!-- ko text: ko.utils.stringifyJson(value) --><!-- /ko -->
@@ -21,20 +24,8 @@
 			<!-- ko template: $root.template --><!-- /ko -->
 		</script>
 		<style>
-			table {
-				border: 1px solid #777;
-				border-collapse: collapse;
-			}
-			
-			caption {
-				font-weight: bold;
-			}
-
-			td, th {
-				text-align: left;
-				vertical-align: top;
-				border: 1px solid #777;
-				padding: 2pt;
+			ul {
+				list-style: none;
 			}
 
 			#fileSection {
@@ -67,17 +58,17 @@
 		</div>
 		<div id="main" data-bind="visible: type">
 			<div id="fileSection" data-bind="if: typeof File !== 'undefined'">
-				<label for="file">Choose&nbsp;<span data-bind="text: type"></span>&nbsp;file: </label><input type="file" data-bind="event: {change: loadFromFile}" /><br />
+				<label for="file">Choose <span data-bind="text: type"></span> file: </label><input type="file" data-bind="event: {change: loadFromFile}" /><br />
 				<small>or</small>
 			</div>
-			Load&nbsp;<span data-bind="text: type"></span>&nbsp;sample:
+			Load <span data-bind="text: type"></span> sample:
 			<ul id="linksSection" data-bind="click: loadFromLink, clickBubble: false, foreach: config().files">
 				<li>
 					<a data-bind="text: $data, attr: {href: $root.type() + '/' + $data}"></a>
 				</li>
 			</ul>
 			<hr />
-			<div data-bind="template: {name: 'data-info', data: {value: data()}}"></div>
+			<div data-bind="visible: data, template: {name: 'data-info', data: {key: 'Root', value: data()}}"></div>
 		</div>
 	</body>
 </html>

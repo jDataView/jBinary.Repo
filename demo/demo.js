@@ -68,19 +68,30 @@ define(['require', 'knockout'], function (require, ko) {
 
 	viewModel.data = ko.computed(function () {
 		var binary = viewModel.binary();
-		return binary ? binary.read('jBinary.all') : {};
+		return binary ? binary.read('jBinary.all') : null;
 	});
 
 	viewModel.object2array = function (object) {
-		if (object instanceof Function) return [];
+		if (object.length > 256) {
+			var oldObject = object;
+			object = {};
+			for (var i = 0, length = oldObject.length; i < length; i += 256) {
+				object[i + '-' + (i + 255)] = Array.prototype.slice.call(oldObject, i, i + 256);
+			}
+			for (var key in oldObject) {
+				if (!(key >= 0 && key < oldObject.length)) {
+					object[key] = oldObject[key];
+				}
+			}
+		}
 
 		var array = [];
 
-		ko.utils.objectForEach(ko.unwrap(object), function (key, value) {
-			if (key > 16 || key.charAt(0) === '_') return;
+		ko.utils.objectForEach(object, function (key, value) {
+			if ((object.length > 256 && key >= 0 && key < object.length) || key.charAt(0) === '_') return;
 			array.push({
 				key: key,
-				value: key == 16 ? '...' : value
+				value: value
 			});
 		});
 
