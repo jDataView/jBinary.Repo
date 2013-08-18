@@ -70,7 +70,6 @@ define(['require', 'knockout'], function (require, ko) {
 	var viewModel = {
 		associations: ko.observable({}),
 		type: ko.observable(''),
-		template: ko.observable({}),
 		config: ko.observable({}),
 		binary: ko.observable(null)
 	};
@@ -132,30 +131,6 @@ define(['require', 'knockout'], function (require, ko) {
 	});
 
 	require(['domReady!'], function () {
-		if (!('head' in document)) {
-			document.head = document.getElementsByTagName('head')[0];
-		}
-
-		ko.computed(function () {
-			var type = viewModel.type();
-			if (!type) return;
-
-			viewModel.template({});
-
-			var templateUrl = 'text!' + type + '/demo.html';
-
-			require([templateUrl], function (html) {
-				if (!document.getElementById(templateUrl)) {
-					var script = document.createElement('script');
-					script.id = templateUrl;
-					script.type = 'text/html';
-					script.text = html;
-					document.head.appendChild(script);
-				}
-				viewModel.template(templateUrl);
-			}, function () {});
-		});
-
 		ko.applyBindings(viewModel);
 	});
 
