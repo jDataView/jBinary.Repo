@@ -10,10 +10,7 @@ require.config({
 			'../../jBinary/src/jbinary',
 			'//raw.github.com/jDataView/jBinary/master/src/jbinary'
 		][productionMode],
-		'jbinary.repo': [
-			'../src/jbinary.repo',
-			'//raw.github.com/jDataView/jBinary.Repo/gh-pages/src/jbinary.repo'
-		][productionMode],
+		'jbinary.repo': '../src/jbinary.repo',
 		'jbinary.repo.typeSets': 'jbinary.repo/../../typeSets',
 		'prettyPrint': [
 			'../../prettyPrint.js/prettyprint',
