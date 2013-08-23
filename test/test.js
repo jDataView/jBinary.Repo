@@ -97,7 +97,7 @@ require.config({
 		],
 		'jbinary.repo': [
 			'../src/jbinary.repo',
-			'//raw.github.com/jDataView/jBinary.Repo/master/src/jbinary.repo'
+			'//raw.github.com/jDataView/jBinary.Repo/gh-pages/src/jbinary.repo'
 		],
 		'jbinary.repo.typeSets': 'jbinary.repo/../../typeSets'
 	}
