@@ -1,5 +1,6 @@
 define(['jbinary'], function (jBinary) {
 	return {
+		'jBinary.all': 'File',
 		'jBinary.mimeType': 'application/x-tar',
 
 		OctValue: jBinary.Template({

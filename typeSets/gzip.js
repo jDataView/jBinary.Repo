@@ -14,9 +14,9 @@ require.config({
 
 define(['jbinary', 'jsdeflate/rawinflate', 'jsdeflate/rawdeflate'], function (jBinary, inflate, deflate) {
 	return {
+		'jBinary.all': 'File',
 		'jBinary.littleEndian': true,
 		'jBinary.mimeType': 'application/x-gzip',
-		'jBinary.all': 'File',
 
 		Flag: jBinary.Template({
 			baseType: 1,

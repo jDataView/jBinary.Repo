@@ -7,12 +7,28 @@ define(['require', 'module', 'jbinary'], function (requirejs, module, jBinary) {
 		for (var i = 0, length = names.length; i < length; i++) {
 			var name = names[i];
 			if (name.indexOf('/') < 0) {
-				names[i] = 'jbinary.repo.typeSets/' + name;
+				names[i] = 'jbinary.repo!' + name;
 			}
 		}
 
 		requirejs(names, function () {
 			callback.apply(Repo, arguments);
+		});
+	};
+
+	Repo.normalize = function (name) {
+		return name.toUpperCase();
+	};
+
+	Repo.load = function (name, requirejs, onLoad) {
+		if (name in Repo) {
+			return onLoad(Repo[name]);
+		}
+
+		var url = 'jbinary.repo.typeSets/' + name.toLowerCase();
+
+		return requirejs([url], function (typeSet) {
+			onLoad(Repo[name] = typeSet);
 		});
 	};
 

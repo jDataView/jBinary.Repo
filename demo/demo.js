@@ -1,58 +1,33 @@
+var productionMode = location.hash === '#debug' ? 0 : 1;
+
 require.config({
 	paths: {
 		'jdataview': [
 			'../../jDataView/src/jdataview',
 			'//raw.github.com/jDataView/jDataView/master/src/jdataview'
-		],
+		][productionMode],
 		'jbinary': [
 			'../../jBinary/src/jbinary',
 			'//raw.github.com/jDataView/jBinary/master/src/jbinary'
-		],
-		'jbinary.repo': [
-			'../src/jbinary.repo',
-			'//raw.github.com/jDataView/jBinary.Repo/master/src/jbinary.repo'
-		],
+		][productionMode],
+		'jbinary.repo': '../src/jbinary.repo',
 		'jbinary.repo.typeSets': 'jbinary.repo/../../typeSets',
+		'prettyPrint': [
+			'../../prettyPrint.js/prettyprint',
+			'//raw.github.com/RReverser/prettyPrint.js/master/prettyprint'
+		][productionMode],
 		'domReady': '//cdnjs.cloudflare.com/ajax/libs/require-domReady/2.0.1/domReady',
 		'text': '//cdnjs.cloudflare.com/ajax/libs/require-text/2.0.5/text',
 		'knockout': '//cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min'
+	},
+	shim: {
+		'prettyPrint': {
+			exports: 'prettyPrint'
+		}
 	}
 });
 
 define(['require', 'knockout'], function (require, ko) {
-	ko.bindingHandlers.partial = {
-		init: function () {
-			return {controlsDescendantBindings: true};
-		},
-		update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-			var url = ko.unwrap(valueAccessor());
-
-			if (!url) return;
-
-			var id = 'text!' + url;
-
-			if (!document.getElementById(id)) {
-				var script = document.createElement('script');
-				script.id = id;
-				script.type = 'text/html';
-				document.head.appendChild(script);
-				require([id], function (text) {
-					script.text = text;
-				});
-			}
-			
-			require([id], function () {
-				ko.applyBindingsToNode(element, {
-					template: {
-						name: id,
-						data: bindingContext.$data
-					}
-				}, bindingContext.$root);
-			}, function () {});
-		}
-	};
-	ko.virtualElements.allowedBindings.partial = true;
-
 	ko.bindingHandlers.download = {
 		init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 			function getInfo(propName) {
@@ -92,41 +67,34 @@ define(['require', 'knockout'], function (require, ko) {
 	};
 
 	var viewModel = {
+		associations: ko.observable({}),
 		type: ko.observable(''),
-		isTypeResolved: ko.observable(false),
-		files: ko.observable([]),
+		config: ko.observable({}),
 		binary: ko.observable(null)
 	};
 
 	viewModel.data = ko.computed(function () {
 		var binary = viewModel.binary();
-		return binary ? binary.read('jBinary.all') : {};
+		return binary ? binary.read('jBinary.all') : null;
 	});
 
-	viewModel.object2array = function (object) {
-		if (object instanceof Function) return [];
-
-		var array = [];
-
-		ko.utils.objectForEach(ko.unwrap(object), function (key, value) {
-			if (key > 16 || key.charAt(0) === '_') return;
-			array.push({
-				key: key,
-				value: key == 16 ? '...' : value
-			});
-		});
-
-		return array;
-	};
+	require(['prettyPrint'], function (prettyPrint) {
+		prettyPrint.config.maxDepth = 1;
+		prettyPrint.config.maxArray = 100;
+		prettyPrint.config.filter = function (key) {
+			return key.charAt(0) !== '_';
+		};
+	});
 
 	viewModel.loadData = function (source) {
-		viewModel.binary(null);
-		viewModel.isTypeResolved(false);
-		require(['jbinary', 'jbinary.repo.typeSets/' + viewModel.type()], function (jBinary, typeSet) {
-			viewModel.isTypeResolved(true);
+		require(['jbinary', 'jbinary.repo!' + viewModel.type(), 'prettyPrint'], function (jBinary, typeSet, prettyPrint) {
 			jBinary.load(source, typeSet, function (err, _binary) {
 				if (err) return alert(err);
 				viewModel.binary(_binary);
+
+				var dataSection = document.getElementById('dataSection');
+				dataSection.innerHTML = '';
+				dataSection.appendChild(prettyPrint(viewModel.data()));
 			});
 		});
 	};
@@ -143,15 +111,27 @@ define(['require', 'knockout'], function (require, ko) {
 		viewModel.loadData(target.files[0]);
 	};
 
-	require(['domReady!'], function () {
-		if (!('head' in document)) {
-			document.head = document.getElementsByTagName('head')[0];
-		}
+	var titleSuffix = document.title;
 
-		ko.applyBindings(viewModel);
+	ko.computed(function () {
+		var type = viewModel.type();
+
+		document.title = (type ? type.toUpperCase() + ' - ' : '') + titleSuffix;
+		viewModel.binary(null);
+
+		if (!type) return;
+
+		viewModel.config({});
+		require([type + '/demo'], viewModel.config);
 	});
 
-	require(['text', 'jbinary.repo']); // prefetch
+	require(['jbinary.repo'], function (Repo) {
+		Repo.getAssociations(viewModel.associations);
+	});
+
+	require(['domReady!'], function () {
+		ko.applyBindings(viewModel);
+	});
 
 	return viewModel;
 });

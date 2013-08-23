@@ -1,5 +1,6 @@
-define(['jbinary'], function (jBinary) {
+define(['jbinary', 'jdataview'], function (jBinary, jDataView) {
 	return {
+		'jBinary.all': 'Image',
 		'jBinary.littleEndian': true,
 		'jBinary.mimeType': 'image/bmp',
 
