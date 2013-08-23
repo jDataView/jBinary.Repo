@@ -77,11 +77,10 @@ define(['require', 'module', 'jbinary'], function (requirejs, module, jBinary) {
 		});
 	};
 
+	var load = jBinary.load;
 	jBinary.load = function (source, typeSet, _callback) {
 		function callback(typeSet) {
-			jBinary.loadData(source, function (err, data) {
-				err ? _callback(err) : _callback(null, new jBinary(data, typeSet));
-			});
+			load(source, typeSet, _callback);
 		}
 
 		if (arguments.length < 3) {
