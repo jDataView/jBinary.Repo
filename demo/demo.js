@@ -126,7 +126,13 @@ define(['require', 'knockout'], function (require, ko) {
 	});
 
 	require(['jbinary.repo'], function (Repo) {
-		Repo.getAssociations(viewModel.associations);
+		Repo.getAssociations(function (associations) {
+			viewModel.associations(associations);
+			viewModel.type(location.hash.slice(1));
+			viewModel.type.subscribe(function (newType) {
+				location.hash = newType || '';
+			});
+		});
 	});
 
 	require(['domReady!'], function () {
