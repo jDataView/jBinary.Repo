@@ -4,6 +4,10 @@
 		<title>jBinary.Repo demo</title>
 		<script data-main="demo" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.8/require.min.js"></script>
 		<style>
+			body {
+				margin: 0;
+			}
+			
 			ul {
 				list-style: none;
 			}
@@ -34,7 +38,7 @@
 		</style>
 	</head>
 	<body class="no-ko" data-bind="css: {'no-ko': false}">
-		<a href="https://github.com/jDataView/jBinary.Repo"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+		<a href="https://github.com/jDataView/jBinary.Repo"><img style="border: 0; float: left; height: 100px" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
 		<div id="typeSection">
 			File type:
 			<select data-bind="optionsCaption: 'Select typeset', options: associations().list, value: type" id="typeSelect">
