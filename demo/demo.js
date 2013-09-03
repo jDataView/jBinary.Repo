@@ -1,14 +1,14 @@
-var productionMode = location.hash === '#debug' ? 0 : 1;
+var productionMode = location.search === '?debug' ? 0 : 1;
 
 require.config({
 	paths: {
 		'jdataview': [
 			'../../jDataView/src/jdataview',
-			'//raw.github.com/jDataView/jDataView/master/src/jdataview'
+			'//jdataview.github.io/dist/jdataview'
 		][productionMode],
 		'jbinary': [
 			'../../jBinary/src/jbinary',
-			'//raw.github.com/jDataView/jBinary/master/src/jbinary'
+			'//jdataview.github.io/dist/jbinary'
 		][productionMode],
 		'jbinary.repo': '../src/jbinary.repo',
 		'jbinary.repo.typeSets': 'jbinary.repo/../../typeSets',
