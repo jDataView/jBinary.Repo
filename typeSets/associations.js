@@ -1,6 +1,4 @@
-define(function () {
-
-var descriptors = {
+define({
 	bmp: {
 		extensions: ['bmp'],
 		mimeTypes: ['image/bmp', 'image/x-bmp', 'image/x-bitmap', 'image/x-xbitmap', 'image/x-win-bitmap', 'image/x-windows-bmp', 'image/ms-bmp', 'image/x-ms-bmp', 'application/bmp', 'application/x-bmp', 'application/x-win-bitmap']
@@ -21,28 +19,4 @@ var descriptors = {
 		extensions: ['tar'],
 		mimeTypes: ['application/tar', 'application/x-tar', 'applicaton/x-gtar', 'multipart/x-tar']
 	}
-};
-
-var associations = {
-	list: []
-};
-
-function mergeDescriptorList(name, listName) {
-	var list = descriptors[name][listName];
-	if (list) {
-		associations[listName] = associations[listName] || {};
-		for (var i = 0, length = list.length; i < length; i++) {
-			associations[listName][list[i]] = name;
-		}
-	}
-}
-
-for (var name in descriptors) {
-	associations.list.push(name);
-	mergeDescriptorList(name, 'extensions');
-	mergeDescriptorList(name, 'mimeTypes');
-}
-
-return associations;
-
 });

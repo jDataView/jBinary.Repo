@@ -1,4 +1,4 @@
-define(['require', 'module', 'jbinary'], function (requirejs, module, jBinary) {
+define(['require', 'module', 'jbinary'], function (require, module, jBinary) {
 	'use strict';
 
 	var Repo = jBinary.Repo = function (names, callback) {
@@ -11,7 +11,7 @@ define(['require', 'module', 'jbinary'], function (requirejs, module, jBinary) {
 			}
 		}
 
-		requirejs(names, function () {
+		require(names, function () {
 			callback.apply(Repo, arguments);
 		});
 	};
@@ -20,20 +20,44 @@ define(['require', 'module', 'jbinary'], function (requirejs, module, jBinary) {
 		return name.toUpperCase();
 	};
 
-	Repo.load = function (name, requirejs, onLoad) {
+	Repo.load = function (name, require, onLoad) {
 		if (name in Repo) {
 			return onLoad(Repo[name]);
 		}
 
 		var url = 'jbinary.repo.typeSets/' + name.toLowerCase();
 
-		return requirejs([url], function (typeSet) {
+		return require([url], function (typeSet) {
 			onLoad(Repo[name] = typeSet);
 		});
 	};
 
+	define('jbinary.repo.typeSets/associations?built', ['jbinary.repo.typeSets/associations'], function (descriptors) {
+		var associations = {
+			list: []
+		};
+
+		function mergeDescriptorList(name, listName) {
+			var list = descriptors[name][listName];
+			if (list) {
+				associations[listName] = associations[listName] || {};
+				for (var i = 0, length = list.length; i < length; i++) {
+					associations[listName][list[i]] = name;
+				}
+			}
+		}
+
+		for (var name in descriptors) {
+			associations.list.push(name);
+			mergeDescriptorList(name, 'extensions');
+			mergeDescriptorList(name, 'mimeTypes');
+		}
+
+		return associations;
+	})
+
 	Repo.getAssociations = function (callback) {
-		requirejs(['jbinary.repo.typeSets/associations'], function (associations) {
+		require(['jbinary.repo.typeSets/associations?built'], function (associations) {
 			callback.call(Repo, associations);
 		});
 	};
