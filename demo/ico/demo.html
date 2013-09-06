@@ -1,0 +1,13 @@
+Icon: <select data-bind="
+optionsCaption: 'Select icon',
+options: data,
+optionsText: function (item) { return item.width + 'x' + item.height + 'x' + item.bpp },
+optionsValue: 'image',
+value: config().selectedImage,
+event: {
+	change: function () {
+		config().selectedImage().toCanvas($element.parentNode.getElementsByTagName('canvas')[0]);
+	}
+}"></select>
+<br />
+<canvas width="0" height="0"></canvas>

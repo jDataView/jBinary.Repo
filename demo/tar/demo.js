@@ -1,3 +1,6 @@
-define({
-	files: ['sample.tar']
+define(['knockout'], function (ko) {
+	return {
+		files: ['sample.tar'],
+		selectedFile: ko.observable()
+	};
 });

@@ -1,4 +1,4 @@
-define(['jbinary'], function (jBinary) {
+define(['jbinary', 'jdataview'], function (jBinary, jDataView) {
 	return {
 		'jBinary.all': 'IconDir',
 		'jBinary.littleEndian': true,
@@ -40,8 +40,14 @@ define(['jbinary'], function (jBinary) {
 			_reserved: ['skip', 1],
 			planesCount: 'uint16',
 			bpp: 'uint16',
-			dataSize: 'uint32',
-			dataOffset: 'uint32'
+			_dataSize: 'uint32',
+			_dataOffset: 'uint32',
+			image: jBinary.Template({
+				baseType: 'IconImage',
+				read: function (context) {
+					return this.binary.read(this.baseType, context._dataOffset);
+				}
+			})
 		},
 
 		IconDir: jBinary.Template({
@@ -136,11 +142,18 @@ define(['jbinary'], function (jBinary) {
 			}
 		}),
 
-		IconImage: {
+		IconImage: ['object', {
 			// Dimensions of DIB header
 			dibHeaderSize: 'uint32',
 			// image dimensions
-			size: 'Dimensions',
+			size: jBinary.Template({
+				baseType: 'Dimensions',
+				read: function () {
+					var size = this.baseRead();
+					size.vert /= 2;
+					return size;
+				}
+			}),
 			// color planes count (equals 1)
 			planesCount: 'uint16',
 			// color depth (bits per pixel)
@@ -168,7 +181,7 @@ define(['jbinary'], function (jBinary) {
 			palette: ['if', function (context) { return context.bpp <= 8 }, ['array', 'RGBQuad', 'colorsCount']],
 			pixelData: jBinary.Type({
 				read: function (header) {
-					var width = header.size.horz, height = header.size.vert / 2;
+					var width = header.size.horz, height = header.size.vert;
 					var data = new jDataView(4 * width * height);
 					var PixelRow = this.binary.getType(['PixelRow', header]);
 					for (var y = height - 1; y > 0; y--) {
@@ -181,7 +194,31 @@ define(['jbinary'], function (jBinary) {
 					}
 					return data.getBytes(undefined, 0);
 				}
-			})
-		},
+			}),
+			_binary: function () { return this.binary }
+		}, {
+			toCanvas: function (canvas) {
+				if (!this.pixelData) {
+					throw new TypeError('Sorry, but RLE compressed images are not supported.');
+				}
+
+				var context = canvas.getContext('2d'),
+					imgData = context.createImageData(this.size.horz, this.size.vert);
+
+				if ('set' in imgData.data) {
+					imgData.data.set(this.pixelData);
+				} else {
+					for (var i = 0, length = this.pixelData.length; i < length; i++) {
+						imgData.data[i] = this.pixelData[i];
+					}
+				}
+
+				canvas.width = imgData.width;
+				canvas.height = imgData.height;
+
+				// putting image data to given canvas context
+				context.putImageData(imgData, 0, 0);
+			}
+		}]
 	};
 });

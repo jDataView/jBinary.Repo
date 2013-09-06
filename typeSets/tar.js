@@ -69,7 +69,7 @@ define(['jbinary'], function (jBinary) {
 		}],
 		{
 			_padding1: 'Padding',
-			content_binary: ['binary', function () { return this.binary.getContext(1).size }],
+			content: ['binary', function () { return this.binary.getContext(1).size }],
 			_padding2: 'Padding'
 		}
 		],

@@ -54,7 +54,7 @@ define(['require', 'module', 'jbinary'], function (require, module, jBinary) {
 		}
 
 		return associations;
-	})
+	});
 
 	Repo.getAssociations = function (callback) {
 		require(['jbinary.repo.typeSets/associations?built'], function (associations) {

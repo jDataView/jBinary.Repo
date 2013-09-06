@@ -31,7 +31,7 @@ define(['require', 'knockout'], function (require, ko) {
 	ko.bindingHandlers.download = {
 		init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 			function getInfo(propName) {
-				return ko.unwrap(valueAccessor())[propName];
+				return ko.unwrap(valueAccessor()[propName]);
 			}
 
 			var blob;
@@ -66,6 +66,21 @@ define(['require', 'knockout'], function (require, ko) {
 		}
 	};
 
+	require(['prettyPrint'], function (prettyPrint) {
+		prettyPrint.config.maxDepth = 1;
+		prettyPrint.config.maxArray = 100;
+		prettyPrint.config.filter = function (key) {
+			return key.charAt(0) !== '_';
+		};
+		
+		ko.bindingHandlers.prettyPrint = {
+			update: function (element, valueAccessor) {
+				element.innerHTML = '';
+				element.appendChild(prettyPrint(ko.unwrap(valueAccessor())));
+			}
+		};
+	});
+
 	var viewModel = {
 		associations: ko.observable({}),
 		type: ko.observable(''),
@@ -78,23 +93,11 @@ define(['require', 'knockout'], function (require, ko) {
 		return binary ? binary.read('jBinary.all') : null;
 	});
 
-	require(['prettyPrint'], function (prettyPrint) {
-		prettyPrint.config.maxDepth = 1;
-		prettyPrint.config.maxArray = 100;
-		prettyPrint.config.filter = function (key) {
-			return key.charAt(0) !== '_';
-		};
-	});
-
 	viewModel.loadData = function (source) {
 		require(['jbinary', 'jbinary.repo!' + viewModel.type(), 'prettyPrint'], function (jBinary, typeSet, prettyPrint) {
-			jBinary.load(source, typeSet, function (err, _binary) {
+			jBinary.load(source, typeSet, function (err, binary) {
 				if (err) return alert(err);
-				viewModel.binary(_binary);
-
-				var dataSection = document.getElementById('dataSection');
-				dataSection.innerHTML = '';
-				dataSection.appendChild(prettyPrint(viewModel.data()));
+				viewModel.binary(binary);
 			});
 		});
 	};
@@ -123,6 +126,20 @@ define(['require', 'knockout'], function (require, ko) {
 
 		viewModel.config({});
 		require([type + '/demo'], viewModel.config);
+
+		if (!document.getElementById(type + '.html')) {
+			(function (callback) {
+				require(['text!' + type + '/demo.html'], callback, function () {
+					callback('This file type hasn\'t custom demo.');
+				});
+			})(function (html) {
+				var script = document.createElement('script');
+				script.id = type + '.html';
+				script.type = 'text/html';
+				script.text = html;
+				document.head.appendChild(script);
+			});
+		}
 	});
 
 	require(['jbinary.repo'], function (Repo) {
@@ -136,6 +153,10 @@ define(['require', 'knockout'], function (require, ko) {
 	});
 
 	require(['domReady!'], function () {
+		if (!('head' in document)) {
+			document.head = document.getElementsByTagName('head')[0];
+		}
+
 		ko.applyBindings(viewModel);
 	});
 

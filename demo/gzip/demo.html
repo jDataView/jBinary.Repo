@@ -1,3 +1,1 @@
-<!-- ko if: value instanceof require('jbinary') -->
-	<a data-bind="download: {name: $root.data().name, binary: value, label: 'Extract'}"></a>
-<!-- /ko -->
+<a data-bind="download: {name: data().name, binary: data().content(), label: 'Extract ' + data().name}"></a>

@@ -1,0 +1,8 @@
+File: <select data-bind="
+optionsCaption: 'Select file',
+options: data().filter(function (item) { return item.type === 'file' }),
+optionsText: 'name',
+value: config().selectedFile"></select>
+<!-- ko with: config().selectedFile -->
+	<a data-bind="download: {name: name, binary: content, label: 'Extract'}"></a>
+<!-- /ko -->

@@ -1,0 +1,10 @@
+<!-- ko with: {isSupported: ['', 'no'].indexOf(document.createElement('audio').canPlayType('audio/mpeg')) < 0} -->
+	<!-- ko if: isSupported -->
+		<audio controls>
+			<source type="audio/mpeg" data-bind="attr: {src: $parent.binary().toURI()}" />
+		</audio>
+	<!-- /ko -->
+	<!-- ko ifnot: isSupported -->
+		Sorry, your browser does not support native MP3 playback.
+	<!-- /ko -->
+<!-- /ko -->

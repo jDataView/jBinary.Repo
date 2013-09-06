@@ -9,7 +9,7 @@ Feel free to add own file formats:
   1. Fork this repo.
   2. Create folder for your `{format}`.
   4. Add `{format}.js` into folder and export typeset by using AMD `define` method.
-  5. Add `index.html` with demo into folder.
+  5. Add `demo.html` with demo partial into folder.
   6. Register file extension & mime type associations inside [associations.js](https://github.com/jDataView/jBinary.Repo/blob/gh-pages/assoiations.js) (if needed).
   7. Send me pull request.
   8. Watch your demo in [official catalog](https://jDataView.github.io/jBinary.Repo/)!
