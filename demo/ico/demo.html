@@ -6,7 +6,10 @@ optionsValue: 'image',
 value: config().selectedImage,
 event: {
 	change: function () {
-		config().selectedImage().toCanvas($element.parentNode.getElementsByTagName('canvas')[0]);
+		var image = config().selectedImage(),
+			canvas = $element.parentNode.getElementsByTagName('canvas')[0];
+
+		image ? image.toCanvas(canvas) : canvas.width = canvas.height = 0;
 	}
 }"></select>
 <br />

@@ -2,5 +2,5 @@
 	<input type="button" data-bind="value: action + '()', click: function () {
 		$parent.data()[action]($element.parentNode.getElementsByTagName(tagName)[0])
 	}" />
-	<div data-bind="html: '<' + tagName + ' width=0 height=0 />'"></div>
+	<div data-bind="html: $parent.data() && '<' + tagName + ' width=0 height=0 />'"></div>
 </div>
