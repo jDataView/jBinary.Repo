@@ -135,7 +135,7 @@ define(['jbinary', 'jdataview'], function (jBinary, jDataView) {
 				var offsetOverhead = (this.binary.tell() - this.dataOffset) % 4;
 				if (offsetOverhead) {
 					this.binary.skip(4 - offsetOverhead);
-					this.binary._bitShift = 0;
+					this.binary.view._bitOffset = 0;
 				}
 
 				return colors;
