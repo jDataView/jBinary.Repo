@@ -1,9 +1,11 @@
 jBinary.Repo
 ==================
 
-Repo for popular file formats and corresponding demos implemented with jBinary.
+Repo for popular file formats and corresponding demos implemented with [jBinary](https://github.com/jDataView/jBinary).
 
 Watch demos online from [catalog](https://jDataView.github.io/jBinary.Repo/).
+
+For usage in own projects, check out [corresponding page in jBinary documentation](https://github.com/jDataView/jBinary/wiki/The-Repo).
 
 Feel free to add own file formats:
   1. Fork this repo.
