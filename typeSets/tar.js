@@ -34,8 +34,8 @@ define(['jbinary'], function (jBinary) {
 			group: 'Oct8',
 			size: jBinary.Template({
 				baseType: 'Oct12',
-				write: function (context) {
-					this.baseWrite(context.content_binary.view.byteLength);
+				write: function (_, context) {
+					this.baseWrite(context.content.view.byteLength);
 				}
 			}),
 			mod_time: jBinary.Template({
