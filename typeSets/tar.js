@@ -18,16 +18,32 @@ define(['jbinary'], function (jBinary) {
 			}
 		}),
 
+		Oct6: ['OctValue', 6],
 		Oct8: ['OctValue', 8],
-
 		Oct12: ['OctValue', 12],
 
 		Padding: ['skip', function () {
 			return (512 - (this.binary.tell() % 512)) % 512;
 		}],
 
+		Checksum: jBinary.Template({
+			baseType: {
+				value: 'Oct6',
+				_after: ['const', ['string', 2], '\x00 ', true]
+			},
+			read: function () {
+				return this.baseRead().value;
+			},
+			write: function (value) {
+				this.baseWrite({
+					value: value
+				});
+			}
+		}),
+
 		FileItem: ['extend',
 		{
+			_startPos: function () { return this.binary.tell() },
 			name: ['string0', 100],
 			mode: 'Oct8',
 			owner: 'Oct8',
@@ -38,7 +54,7 @@ define(['jbinary'], function (jBinary) {
 					this.baseWrite(context.content.view.byteLength);
 				}
 			}),
-			mod_time: jBinary.Template({
+			modTime: jBinary.Template({
 				baseType: 'Oct12',
 				read: function () {
 					return new Date(this.baseRead() * 1000);
@@ -47,28 +63,59 @@ define(['jbinary'], function (jBinary) {
 					this.baseWrite(dateTime / 1000);
 				}
 			}),
-			checksum: 'Oct8',
-			type: ['enum', 'char', {
-				'0': 'file',
-				'1': 'hard',
-				'2': 'symbolic',
-				'3': 'device_char',
-				'4': 'device_block',
-				'5': 'directory',
-				'6': 'pipe',
-				'7': 'contiguous'
-			}],
-			name_linked: ['string0', 100],
+			_checksumPos: function () { return this.binary.tell() },
+			_checksum: jBinary.Template({
+				baseType: 'Checksum',
+				write: function () {
+					this.binary.skip(8); // will be set to real checksum later
+				}
+			}),
+			type: ['enum', 'char', [
+				'file',
+				'hard',
+				'symbolic',
+				'device_char',
+				'device_block',
+				'directory',
+				'pipe',
+				'contiguous'
+			]],
+			nameLinked: ['string0', 100],
 			_ustar: ['const', ['string', 8], 'ustar\x0000']
 		},
 		['if', function (context) { return context._ustar === undefined || context._ustar === 'ustar\x0000' }, {
-			owner_name: ['string0', 32],
-			group_name: ['string0', 32],
+			ownerName: ['string0', 32],
+			groupName: ['string0', 32],
 			device: ['array', 'Oct8', 2],
-			name_prefix: ['string0', 155]
+			namePrefix: ['string0', 155]
 		}],
 		{
 			_padding1: 'Padding',
+			_realChecksum: function () {
+				var context = this.binary.getContext(1),
+					startPos = context._startPos,
+					length = this.binary.tell() - startPos,
+					bytes = this.binary.read(['blob', length], startPos),
+					checksum = 0;
+
+				for (var i = 0, length = bytes.length; i < length; i++) {
+					checksum += bytes[i];
+				}
+
+				for (var i = 0; i <= 6; i++) {
+					checksum += -bytes[context._checksumPos + i] + 32;
+				}
+
+				return checksum;
+			},
+			hasValidChecksum: jBinary.Type({
+				read: function (context) {
+					return this.binary.getContext(1)._checksum === context._realChecksum;
+				},
+				write: function (_, context) {
+					this.binary.write('Checksum', context._realChecksum, this.binary.getContext(1)._checksumPos);
+				}
+			}),
 			content: ['binary', function () { return this.binary.getContext(1).size }],
 			_padding2: 'Padding'
 		}
