@@ -14,7 +14,7 @@ require.config({
 		'jbinary.repo.typeSets': 'jbinary.repo/../../typeSets',
 		'prettyPrint': [
 			'../../prettyPrint.js/prettyprint',
-			'//raw.github.com/RReverser/prettyPrint.js/master/prettyprint'
+			'//rawgithub.com/RReverser/prettyPrint.js/master/prettyprint'
 		][productionMode],
 		'domReady': '//cdnjs.cloudflare.com/ajax/libs/require-domReady/2.0.1/domReady',
 		'text': '//cdnjs.cloudflare.com/ajax/libs/require-text/2.0.5/text',

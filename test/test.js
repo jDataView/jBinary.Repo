@@ -89,15 +89,15 @@ require.config({
 	paths: {
 		'jdataview': [
 			'../../jDataView/src/jdataview',
-			'//raw.github.com/jDataView/jDataView/master/src/jdataview'
+			'//jdataview.github.io/dist/jdataview'
 		],
 		'jbinary': [
 			'../../jBinary/src/jbinary',
-			'//raw.github.com/jDataView/jBinary/master/src/jbinary'
+			'//jdataview.github.io/dist/jbinary'
 		],
 		'jbinary.repo': [
 			'../src/jbinary.repo',
-			'//raw.github.com/jDataView/jBinary.Repo/gh-pages/src/jbinary.repo'
+			'//rawgithub.com/jDataView/jBinary.Repo/gh-pages/src/jbinary.repo'
 		],
 		'jbinary.repo.typeSets': 'jbinary.repo/../../typeSets'
 	}

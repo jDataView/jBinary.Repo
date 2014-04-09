@@ -26,21 +26,6 @@ define(['jbinary'], function (jBinary) {
 			return (512 - (this.binary.tell() % 512)) % 512;
 		}],
 
-		Checksum: jBinary.Template({
-			baseType: {
-				value: 'Oct6',
-				_after: ['const', ['string', 2], '\x00 ', true]
-			},
-			read: function () {
-				return this.baseRead().value;
-			},
-			write: function (value) {
-				this.baseWrite({
-					value: value
-				});
-			}
-		}),
-
 		FileItem: ['extend',
 		{
 			_startPos: function () { return this.binary.tell() },
@@ -65,7 +50,7 @@ define(['jbinary'], function (jBinary) {
 			}),
 			_checksumPos: function () { return this.binary.tell() },
 			_checksum: jBinary.Template({
-				baseType: 'Checksum',
+				baseType: 'Oct8',
 				write: function () {
 					this.binary.skip(8); // will be set to real checksum later
 				}
@@ -102,8 +87,8 @@ define(['jbinary'], function (jBinary) {
 					checksum += bytes[i];
 				}
 
-				for (var i = 0; i <= 6; i++) {
-					checksum += -bytes[context._checksumPos + i] + 32;
+				for (var checksumPos = context._checksumPos - startPos, i = 0; i < 8; i++) {
+					checksum += -bytes[checksumPos + i] + 32;
 				}
 
 				return checksum;
@@ -113,7 +98,7 @@ define(['jbinary'], function (jBinary) {
 					return this.binary.getContext(1)._checksum === context._realChecksum;
 				},
 				write: function (_, context) {
-					this.binary.write('Checksum', context._realChecksum, this.binary.getContext(1)._checksumPos);
+					this.binary.write('Oct8', context._realChecksum, this.binary.getContext(1)._checksumPos);
 				}
 			}),
 			content: ['binary', function () { return this.binary.getContext(1).size }],
