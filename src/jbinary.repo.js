@@ -73,6 +73,12 @@ define(['require', 'module', 'jbinary'], function (require, module, jBinary) {
 		};
 
 		Repo.getAssociations(function (associations) {
+			if (source.type) {
+				if (callback(associations.mimeTypes[source.type])) {
+					return;
+				}
+			}
+			
 			if (source.name) {
 				// extracting only longest extension part
 				var longExtension = source.name.match(/^(.*\/)?.*?(\.|$)(.*)$/)[3].toLowerCase();
@@ -91,24 +97,12 @@ define(['require', 'module', 'jbinary'], function (require, module, jBinary) {
 				}
 			}
 
-			if (source.type) {
-				if (callback(associations.mimeTypes[source.type])) {
-					return;
-				}
-			}
-
 			_callback();
 		});
 	};
 
-	var load = jBinary.load;
-	jBinary.load = function (source, typeSet, _callback) {
-		function callback(typeSet) {
-			load(source, typeSet, _callback);
-		}
-
-		if (arguments.length < 3) {
-			_callback = arguments[1];
+	jBinary.Repo.getTypeSet = function (source, typeSet, callback) {
+		if (!typeSet) {
 			var srcInfo;
 
 			if (typeof Blob !== 'undefined' && source instanceof Blob) {
@@ -122,7 +116,7 @@ define(['require', 'module', 'jbinary'], function (require, module, jBinary) {
 			if (srcInfo) {
 				Repo.getAssociation(srcInfo, callback);
 			} else {
-				callback();
+				callback(typeSet);
 			}
 		} else {
 			typeof typeSet === 'string' ? Repo(typeSet, callback) : callback(typeSet);
