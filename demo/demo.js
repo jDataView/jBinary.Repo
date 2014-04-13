@@ -85,7 +85,8 @@ define(['require', 'knockout'], function (require, ko) {
 		associations: ko.observable({}),
 		type: ko.observable(''),
 		config: ko.observable({}),
-		binary: ko.observable(null)
+		binary: ko.observable(null),
+		isMenuVisible: ko.observable(false)
 	};
 
 	viewModel.data = ko.computed(function () {
@@ -124,7 +125,6 @@ define(['require', 'knockout'], function (require, ko) {
 
 		if (!type) return;
 
-		viewModel.config({});
 		require([type + '/demo'], viewModel.config);
 
 		if (!document.getElementById(type + '.html')) {

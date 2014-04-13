@@ -122,7 +122,7 @@ define(['jbinary', 'jdataview'], function (jBinary, jDataView) {
 			importantColorsCount: jBinary.Template({
 				baseType: 'uint32',
 				read: function (context) {
-					return this.baseRead() || context.baseType;
+					return this.baseRead() || context.colorsCount;
 				}
 			}),
 			// color palette (mandatory for <=8bpp images)
