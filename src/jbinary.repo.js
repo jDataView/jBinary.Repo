@@ -101,25 +101,34 @@ define(['require', 'module', 'jbinary'], function (require, module, jBinary) {
 		});
 	};
 
-	jBinary.Repo.getTypeSet = function (source, typeSet, callback) {
-		if (!typeSet) {
-			var srcInfo;
+	jBinary.load.getTypeSet = function (source, typeSet, callback) {
+		switch (typeof typeSet) {
+			case 'undefined':
+				var srcInfo;
 
-			if (typeof Blob !== 'undefined' && source instanceof Blob) {
-				srcInfo = source;
-			} else
-			if (typeof source === 'string') {
-				var dataParts = source.match(/^data:(.+?)(;base64)?,/);
-				srcInfo = dataParts ? {type: dataParts[1]} : {name: source};
-			}
+				if (typeof Blob !== 'undefined' && source instanceof Blob) {
+					srcInfo = source;
+				} else
+				if (typeof source === 'string') {
+					var dataParts = source.match(/^data:(.+?)(;base64)?,/);
+					srcInfo = dataParts ? {type: dataParts[1]} : {name: source};
+				}
 
-			if (srcInfo) {
-				Repo.getAssociation(srcInfo, callback);
-			} else {
+				if (srcInfo) {
+					Repo.getAssociation(srcInfo, callback);
+				} else {
+					callback(typeSet);
+				}
+
+				break;
+
+			case 'string':
+				Repo(typeSet, callback);
+				break;
+
+			default:
 				callback(typeSet);
-			}
-		} else {
-			typeof typeSet === 'string' ? Repo(typeSet, callback) : callback(typeSet);
+				break;
 		}
 	};
 
