@@ -1,6 +1,8 @@
 jBinary.Repo
 ==================
 
+**This repo is deprecated and will be replaced with bunch of separate repos for each file type.**
+
 Repo for popular file formats and corresponding demos implemented with [jBinary](https://github.com/jDataView/jBinary).
 
 Watch demos online from [catalog](https://jDataView.github.io/jBinary.Repo/).
